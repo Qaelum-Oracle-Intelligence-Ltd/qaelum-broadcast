@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#0A0A0B">
+<title>QAELUM Build Broadcast</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Sans:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  /* Layout: a broadcast desk behind a locked door. The door is a single passcode field;
+     behind it, the on-air strip, the edition's headline and play button, numbered bulletins,
+     numbers, and past editions. One deliberate dark look, QAELUM black and gold, heavy weights. */
+  :root{
+    --bg:#0A0A0B; --raised:#141518; --card:#1B1D21; --line:#2B2A26;
+    --gold:#C9971A; --gold-l:#E2B740; --cream:#F5F0E2; --grey:#B9B5A8; --grey-dim:#8C887D;
+    --live:#E5484D; --good:#3DDBB8; --warn:#F0B03A; --info:#94B4FF;
+    --f-display:'Fraunces', Georgia, 'Times New Roman', serif;
+    --f-body:'IBM Plex Sans', -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --f-mono:'IBM Plex Mono', ui-monospace, Menlo, monospace;
+    color-scheme: dark;
+  }
+  *{box-sizing:border-box;}
+  html{background:var(--bg);}
+  body{background:var(--bg); color:var(--cream); margin:0;
+       padding-inline:16px; padding-top:calc(22px + env(safe-area-inset-top,0px)); padding-bottom:calc(64px + env(safe-area-inset-bottom,0px));
+       font-family:var(--f-body); font-weight:500; font-size:17px; line-height:1.6;}
+  [hidden]{display:none !important;}
+  a{color:var(--gold-l); text-underline-offset:3px;}
+  button,input{font-family:var(--f-body);}
+  :focus-visible{outline:2px solid var(--gold-l); outline-offset:2px;}
+  h1,h2,h3{margin:0; text-wrap:balance;}
+  .wrap{max-width:860px; margin:0 auto; display:flex; flex-direction:column; gap:30px;}
+
+  /* lock screen */
+  .door{min-height:calc(100vh - 120px); display:flex; align-items:center; justify-content:center;}
+  .door-card{width:100%; max-width:420px; display:flex; flex-direction:column; gap:18px;}
+  .door .brand{font-size:13px;}
+  .door h1{font-family:var(--f-display); font-weight:700; font-size:34px; line-height:1.1; color:#fff;}
+  .door p{margin:0; color:var(--grey); font-size:16px;}
+  .field{display:flex; flex-direction:column; gap:8px;}
+  .field label{font-family:var(--f-mono); font-weight:600; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--gold);}
+  .field input{background:var(--raised); color:#fff; border:1.5px solid var(--line); border-radius:10px; padding:14px 14px;
+               font-family:var(--f-mono); font-weight:600; font-size:20px; letter-spacing:.08em; text-transform:uppercase; width:100%;}
+  .field input:focus{border-color:var(--gold-l); outline:none;}
+  .remember{display:flex; align-items:center; gap:10px; color:var(--grey); font-size:15px; cursor:pointer;}
+  .remember input{accent-color:var(--gold-l); width:18px; height:18px;}
+  .open{background:var(--gold-l); color:#0A0A0B; border:0; border-radius:999px; padding:14px 20px; font-weight:700; font-size:17px; cursor:pointer;}
+  .open:disabled{opacity:.6; cursor:progress;}
+  .msg{min-height:1.5em; font-weight:600; font-size:15px;}
+  .msg.err{color:var(--live);} .msg.wait{color:var(--grey);}
+  .fine{font-size:13px; color:var(--grey-dim);}
+
+  /* on-air strip */
+  .strip{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px 16px;
+         padding-bottom:16px; border-bottom:1px solid var(--line);}
+  .brand{font-family:var(--f-mono); font-weight:600; font-size:13px; letter-spacing:.16em; text-transform:uppercase; color:var(--gold-l);}
+  .air{display:inline-flex; align-items:center; gap:8px; font-family:var(--f-mono); font-weight:600; font-size:12px;
+       letter-spacing:.12em; text-transform:uppercase; padding:5px 11px; border-radius:999px; border:1.5px solid currentColor;}
+  .air.on{color:var(--live);} .air.off{color:var(--grey);}
+  .air .pulse{width:9px; height:9px; border-radius:50%; background:currentColor;}
+  .air.on .pulse{animation:pulse 1.6s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1} 50%{opacity:.25}}
+  @media (prefers-reduced-motion:reduce){ .air.on .pulse{animation:none;} }
+  .meta{font-family:var(--f-mono); font-weight:500; font-size:13px; color:var(--grey);}
+  .lockbtn{background:none; border:1px solid var(--line); color:var(--grey); border-radius:999px; padding:5px 12px; font-size:13px; font-weight:600; cursor:pointer;}
+  .paused-note{border:1.5px solid var(--grey-dim); border-radius:10px; padding:12px 14px; color:var(--grey); font-size:15px;}
+
+  /* headline block */
+  .lead{display:flex; flex-direction:column; gap:14px;}
+  .edition-tag{font-family:var(--f-mono); font-weight:600; font-size:13px; letter-spacing:.12em; text-transform:uppercase; color:var(--gold);}
+  .lead h1{font-family:var(--f-display); font-weight:700; font-size:clamp(28px,5.6vw,42px); line-height:1.12; color:#fff;}
+  .summary{font-size:18px; color:var(--cream); max-width:64ch; margin:0;}
+  .player{display:flex; flex-wrap:wrap; align-items:center; gap:12px;}
+  .play{display:inline-flex; align-items:center; gap:10px; background:var(--gold-l); color:#0A0A0B; border:0; border-radius:999px;
+        padding:12px 20px; font-weight:700; font-size:16px; cursor:pointer;}
+  .play svg{width:16px; height:16px;}
+  .play-status{font-family:var(--f-mono); font-weight:500; font-size:13px; color:var(--grey);}
+
+  .numbers{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px;}
+  .num{background:var(--raised); border:1px solid var(--line); border-radius:12px; padding:14px 16px; display:flex; flex-direction:column; gap:4px; min-width:0;}
+  .num .v{font-family:var(--f-display); font-weight:700; font-size:30px; line-height:1.1; color:#fff; font-variant-numeric:tabular-nums;}
+  .num .k{font-family:var(--f-mono); font-weight:600; font-size:11.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--gold);}
+  .num .s{font-size:14px; color:var(--grey);}
+
+  section{display:flex; flex-direction:column; gap:14px;}
+  h2{font-family:var(--f-display); font-weight:700; font-size:24px; color:#fff;}
+
+  .bulletins{display:flex; flex-direction:column; gap:12px; counter-reset:b;}
+  .bul{background:var(--raised); border:1px solid var(--line); border-radius:12px; padding:16px 18px; display:flex; flex-direction:column; gap:8px;}
+  .bul-head{display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:6px 12px;}
+  .bul h3{font-family:var(--f-body); font-weight:700; font-size:18px; color:#fff;}
+  .bul h3::before{counter-increment:b; content:counter(b, decimal-leading-zero) "  "; font-family:var(--f-mono); color:var(--gold); font-size:14px;}
+  .pill{font-family:var(--f-mono); font-weight:600; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; padding:3px 10px;
+        border-radius:999px; border:1.5px solid currentColor; white-space:nowrap;}
+  .pill.built{color:var(--good);} .pill.off{color:var(--warn);} .pill.design{color:var(--info);} .pill.fix{color:var(--good);}
+  .bul p{margin:0; max-width:70ch;}
+  .why{color:var(--grey);}
+  .why b{color:var(--gold-l); font-weight:700;}
+  .who{font-family:var(--f-mono); font-weight:500; font-size:12.5px; color:var(--grey-dim);}
+
+  .list{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:10px;}
+  .list li{display:grid; grid-template-columns:22px minmax(0,1fr); gap:8px; align-items:start;}
+  .list li::before{content:""; width:10px; height:10px; margin-top:8px; border-radius:2px; background:var(--gold);}
+  .list.block li::before{background:var(--live);}
+  .moves{display:flex; flex-direction:column;}
+  .move{display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,1fr); gap:6px 16px; padding-block:11px; border-top:1px solid var(--line);}
+  .move:last-child{border-bottom:1px solid var(--line);}
+  .move .item{font-weight:700; color:#fff;}
+  .move .to{color:var(--good); font-weight:600;}
+  .move .from{color:var(--grey-dim); font-size:14px; display:block; font-weight:500;}
+
+  .archive{display:flex; flex-direction:column; gap:8px;}
+  details{background:var(--raised); border:1px solid var(--line); border-radius:10px;}
+  summary{cursor:pointer; padding:12px 16px; font-weight:600; display:flex; gap:12px; flex-wrap:wrap; align-items:baseline;}
+  summary .d{font-family:var(--f-mono); font-size:13px; color:var(--gold);}
+  details .inner{padding:0 16px 14px; color:var(--grey); font-size:15.5px;}
+  .empty{color:var(--grey); font-size:15px;}
+
+  .rule{border:1px solid var(--line); border-radius:10px; padding:12px 14px; font-size:14.5px; color:var(--grey);}
+  .rule b{color:var(--cream);}
+  footer{font-family:var(--f-mono); font-size:12px; color:var(--grey-dim); border-top:1px solid var(--line); padding-top:16px;}
+
+  @media (max-width:640px){
+    .numbers{grid-template-columns:minmax(0,1fr);}
+    .move{grid-template-columns:minmax(0,1fr);}
+  }
+</style>
+</head>
+<body>
+
+<!-- The locked door -->
+<div class="door" id="door">
+  <form class="door-card" id="doorForm" autocomplete="off">
+    <span class="brand">QAELUM · Build Broadcast</span>
+    <h1>Private broadcast</h1>
+    <p>Enter the passcode Nahum sent you. It is the same for every edition.</p>
+    <div class="field">
+      <label for="code">Passcode</label>
+      <input id="code" name="code" type="text" inputmode="text" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX-XXXX" required>
+    </div>
+    <label class="remember" for="remember"><input type="checkbox" id="remember"> Remember on this phone</label>
+    <button class="open" id="openBtn" type="submit">Open broadcast</button>
+    <div class="msg" id="msg" role="status" aria-live="polite"></div>
+    <p class="fine">Everything on this page is encrypted. Without the passcode the file is unreadable, including to anyone who finds the link.</p>
+  </form>
+</div>
+
+<!-- The broadcast (filled after unlock) -->
+<div class="wrap" id="show" hidden>
+  <div class="strip">
+    <span class="brand">QAELUM · Build Broadcast</span>
+    <span class="air on" id="air"><span class="pulse"></span><span id="airText">On air</span></span>
+    <span class="meta" id="nextLine"></span>
+    <button class="lockbtn" id="lockBtn" type="button">Lock</button>
+  </div>
+  <div class="paused-note" id="pausedNote" hidden>The broadcast is paused. Editions resume when Nahum switches it back on.</div>
+  <div class="lead">
+    <span class="edition-tag" id="edTag"></span>
+    <h1 id="headline"></h1>
+    <p class="summary" id="summary"></p>
+    <div class="player" id="player">
+      <button class="play" id="playBtn" type="button">
+        <svg viewBox="0 0 16 16" aria-hidden="true" id="playIcon"><path d="M3 1.8v12.4L14 8z" fill="currentColor"/></svg>
+        <span id="playLabel">Play briefing</span>
+      </button>
+      <span class="play-status" id="playStatus" aria-live="polite"></span>
+    </div>
+  </div>
+  <div class="numbers" id="numbers"></div>
+  <section><h2>What changed</h2><div class="bulletins" id="bulletins"></div></section>
+  <section><h2>Status moves</h2><div class="moves" id="moves"></div></section>
+  <section><h2>Blocked or waiting</h2><ul class="list block" id="blocked"></ul></section>
+  <section><h2>Next on the list</h2><ul class="list" id="next"></ul></section>
+  <section><h2>Past editions</h2><div class="archive" id="archive"></div></section>
+  <div class="rule"><b>How this is written.</b> Every line comes from a change merged into the QAELUM repository or from running its test suite on the day of the edition. If nothing moved, the edition says so. Built does not mean live: nothing here has run on the live network yet.</div>
+  <footer id="foot">Nahum · QAELUM Oracle Intelligence · private broadcast</footer>
+</div>
+
+<script type="application/json" id="sealed">__SEALED_PAYLOAD__</script>
+
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var SEALED = JSON.parse($('sealed').textContent);
+  var KEY_STORE = 'qaelum-broadcast-code';
+  var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+  function b64(s){ var bin = atob(s), out = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i); return out; }
+  function normalise(code){ return String(code || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, ''); }
+
+  async function unseal(code){
+    var enc = new TextEncoder();
+    var base = await crypto.subtle.importKey('raw', enc.encode(normalise(code)), 'PBKDF2', false, ['deriveKey']);
+    var key = await crypto.subtle.deriveKey(
+      {name: 'PBKDF2', salt: b64(SEALED.salt), iterations: SEALED.iter, hash: 'SHA-256'},
+      base, {name: 'AES-GCM', length: 256}, false, ['decrypt']);
+    var plain = await crypto.subtle.decrypt({name: 'AES-GCM', iv: b64(SEALED.iv)}, key, b64(SEALED.ct));
+    return JSON.parse(new TextDecoder().decode(plain));
+  }
+
+  function store(code){ try { localStorage.setItem(KEY_STORE, code); } catch(e){} }
+  function recall(){ try { return localStorage.getItem(KEY_STORE); } catch(e){ return null; } }
+  function forget(){ try { localStorage.removeItem(KEY_STORE); } catch(e){} }
+
+  var msg = $('msg'), btn = $('openBtn');
+  if (!window.crypto || !crypto.subtle){
+    msg.className = 'msg err'; msg.textContent = 'This browser cannot open encrypted pages. Open the link in Chrome or Safari.'; btn.disabled = true;
+  }
+
+  async function tryOpen(code, remember, quiet){
+    btn.disabled = true; if (!quiet){ msg.className = 'msg wait'; msg.textContent = 'Unlocking…'; }
+    try {
+      var data = await unseal(code);
+      if (remember) store(code);
+      msg.textContent = ''; render(data); $('door').hidden = true; $('show').hidden = false; window.scrollTo(0, 0);
+    } catch(e){
+      if (quiet){ forget(); msg.textContent = ''; }
+      else { msg.className = 'msg err'; msg.textContent = 'That passcode did not open it. Check it and try again.'; }
+    } finally { btn.disabled = false; }
+  }
+
+  $('doorForm').addEventListener('submit', function(ev){ ev.preventDefault(); tryOpen($('code').value, $('remember').checked, false); });
+  $('lockBtn').addEventListener('click', function(){ forget(); stopAudio(); location.reload(); });
+  var saved = recall(); if (saved && window.crypto && crypto.subtle) tryOpen(saved, true, true);
+
+  function longDate(iso){
+    var p = iso.split('-').map(Number); var d = new Date(Date.UTC(p[0], p[1]-1, p[2]));
+    return DAYS[d.getUTCDay()] + ' ' + p[2] + ' ' + MONTHS[p[1]-1] + ' ' + p[0];
+  }
+  function el(tag, cls, text){ var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+  var ed = null;
+  function render(DATA){
+    var eds = DATA.editions.slice().sort(function(a,b){ return b.number - a.number; });
+    ed = eds[0];
+    var st = DATA.status || {};
+    if (st.paused){
+      $('air').className = 'air off'; $('airText').textContent = 'Paused'; $('pausedNote').hidden = false; $('nextLine').textContent = 'No editions while paused';
+    } else if (st.next_edition){
+      var m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(st.next_edition);
+      if (m){
+        var d = new Date(Date.UTC(+m[1], +m[2]-1, +m[3])); var h = +m[4];
+        var part = h < 12 ? 'morning' : (h < 17 ? 'afternoon' : 'evening');
+        $('nextLine').textContent = 'Next edition: ' + DAYS[d.getUTCDay()] + ' ' + (+m[3]) + ' ' + MONTHS[+m[2]-1] + ', ' + part + ', Lagos time';
+      }
+    }
+    $('edTag').textContent = 'Edition ' + ed.number + ' · ' + longDate(ed.date) + ' · covers ' + ed.period;
+    $('headline').textContent = ed.headline;
+    $('summary').textContent = ed.summary;
+
+    var nb = $('numbers'); nb.innerHTML = '';
+    (ed.numbers || []).forEach(function(n){ var c = el('div', 'num'); c.appendChild(el('span', 'k', n.k)); c.appendChild(el('span', 'v', n.v)); c.appendChild(el('span', 's', n.s)); nb.appendChild(c); });
+
+    var bl = $('bulletins'); bl.innerHTML = '';
+    if (!ed.changes || !ed.changes.length) bl.appendChild(el('p', 'empty', 'Nothing was merged in this period.'));
+    (ed.changes || []).forEach(function(c){
+      var b = el('article', 'bul'); var hd = el('div', 'bul-head');
+      hd.appendChild(el('h3', null, c.title)); hd.appendChild(el('span', 'pill ' + (c.status || 'built'), c.status_label || c.status));
+      b.appendChild(hd); b.appendChild(el('p', null, c.plain));
+      if (c.why){ var w = el('p', 'why'); w.appendChild(el('b', null, 'Why it matters: ')); w.appendChild(document.createTextNode(c.why)); b.appendChild(w); }
+      if (c.who) b.appendChild(el('span', 'who', c.who));
+      bl.appendChild(b);
+    });
+
+    var mv = $('moves'); mv.innerHTML = '';
+    if (!ed.moves || !ed.moves.length) mv.appendChild(el('p', 'empty', 'No status changes this period.'));
+    (ed.moves || []).forEach(function(x){
+      var r = el('div', 'move'); r.appendChild(el('span', 'item', x.item));
+      var t = el('span', 'to', x.to); t.appendChild(el('span', 'from', 'was: ' + x.from)); r.appendChild(t); mv.appendChild(r);
+    });
+
+    function fillList(id, items, emptyText){
+      var u = $(id); u.innerHTML = '';
+      (items && items.length ? items : [emptyText]).forEach(function(t){ var li = el('li'); li.appendChild(el('span', null, t)); u.appendChild(li); });
+    }
+    fillList('blocked', ed.blocked, 'Nothing blocked.');
+    fillList('next', ed.next, 'Nothing scheduled.');
+
+    var ar = $('archive'); ar.innerHTML = ''; var past = eds.slice(1);
+    if (!past.length) ar.appendChild(el('p', 'empty', 'This is the first edition. Past editions will collect here.'));
+    past.forEach(function(p){
+      var dt = el('details'); var sm = el('summary');
+      sm.appendChild(el('span', 'd', 'Edition ' + p.number + ' · ' + longDate(p.date))); sm.appendChild(el('span', null, p.headline));
+      dt.appendChild(sm); var inner = el('div', 'inner'); inner.appendChild(el('p', null, p.summary));
+      (p.changes || []).forEach(function(c){ inner.appendChild(el('p', null, '• ' + c.title + ' (' + (c.status_label || c.status) + ')')); });
+      dt.appendChild(inner); ar.appendChild(dt);
+    });
+    $('foot').textContent = 'Nahum · QAELUM Oracle Intelligence · private broadcast · repository state ' + ed.head_commit;
+  }
+
+  // ── spoken briefing: sentence by sentence, with a fallback timer per sentence
+  // because Android Chrome does not always fire onend.
+  var synth = window.speechSynthesis;
+  var playBtn = $('playBtn'), playLabel = $('playLabel'), playStatus = $('playStatus'), playIcon = $('playIcon');
+  var queue = [], idx = 0, playing = false, timer = null, token = 0;
+  var PLAY = 'M3 1.8v12.4L14 8z', STOP = 'M3 3h10v10H3z';
+  if (!synth || typeof window.SpeechSynthesisUtterance !== 'function') $('player').hidden = true;
+
+  function script(){
+    var parts = ['QAELUM build broadcast, edition ' + ed.number + '.', ed.headline + '.', ed.summary];
+    (ed.changes || []).forEach(function(c, i){ parts.push('Item ' + (i + 1) + ': ' + c.title + '. ' + c.plain); });
+    if (ed.numbers && ed.numbers[0]) parts.push(ed.numbers[0].k + ': ' + ed.numbers[0].v + '.');
+    if (ed.blocked && ed.blocked[0]) parts.push('The biggest open problem: ' + ed.blocked[0]);
+    parts.push('That is the briefing. The full edition is on the page.');
+    return parts.join(' ').replace(/\s+/g, ' ').match(/[^.!?]+[.!?]+(\s|$)|[^.!?]+$/g).map(function(s){ return s.trim(); }).filter(Boolean);
+  }
+  function setUI(on){
+    playing = on; playLabel.textContent = on ? 'Stop briefing' : 'Play briefing';
+    playIcon.firstChild.setAttribute('d', on ? STOP : PLAY); if (!on) playStatus.textContent = '';
+  }
+  function stopAudio(){ token++; clearTimeout(timer); try { if (synth) synth.cancel(); } catch(e){} setUI(false); }
+  function speakNext(myToken){
+    if (myToken !== token) return;
+    if (idx >= queue.length){ setUI(false); return; }
+    var text = queue[idx]; var u = new SpeechSynthesisUtterance(text); u.rate = 0.98; u.lang = 'en-GB';
+    var advanced = false;
+    var go = function(){ if (advanced || myToken !== token) return; advanced = true; clearTimeout(timer); idx++; speakNext(myToken); };
+    u.onend = go; u.onerror = go;
+    timer = setTimeout(go, Math.max(3000, text.split(/\s+/).length * 520 + 2000));
+    playStatus.textContent = 'Playing ' + (idx + 1) + ' of ' + queue.length;
+    try { synth.speak(u); } catch(e){ go(); }
+  }
+  playBtn.addEventListener('click', function(){
+    if (!ed) return;
+    if (playing){ stopAudio(); return; }
+    try { synth.cancel(); } catch(e){}
+    queue = script(); idx = 0; token++; setUI(true); speakNext(token);
+  });
+  window.addEventListener('pagehide', stopAudio);
+})();
+</script>
+</body>
+</html>
