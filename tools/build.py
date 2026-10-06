@@ -18,7 +18,7 @@ Encryption: AES-256-GCM. Key from PBKDF2-HMAC-SHA256, 600,000 iterations, random
 Usage:
     BROADCAST_PASSCODE=... python3 build.py --data master.html --out ../
 """
-import argparse, base64, json, os, re, secrets, sys
+import argparse, base64, codecs, json, os, re, secrets, sys
 from pathlib import Path
 
 from cryptography.hazmat.primitives import hashes
@@ -63,7 +63,16 @@ def main():
 
     data = load_data(args.data)
     sealed = seal(data, code)
-    page = (HERE / "template.html").read_text(encoding="utf-8").replace("__SEALED_PAYLOAD__", json.dumps(sealed))
+    template = (HERE / "template.html").read_text(encoding="utf-8")
+    page = template.replace("__SEALED_PAYLOAD__", json.dumps(sealed))
+
+    # Refuse to publish anything that names the tools used to write it, in the
+    # template or in the edition data. The names are ROT13-encoded so this file
+    # does not contain them. The ciphertext is not scanned: it is random base64.
+    tool_names = tuple(codecs.decode(w, "rot13") for w in ("pynhqr", "naguebcvp"))
+    readable = (template + json.dumps(data, ensure_ascii=False)).lower()
+    if any(name in readable for name in tool_names):
+        raise SystemExit("refusing to write: a tooling name appears in the template or the edition data")
 
     # Refuse to write a page that leaks any edition text in the clear.
     for ed in data["editions"]:
