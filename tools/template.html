@@ -142,6 +142,55 @@
   .open-line{background:rgba(240,176,58,.08); border:1px solid rgba(240,176,58,.45); border-radius:10px; padding:10px 14px;}
   .open-line b{color:var(--warn); font-weight:700;}
 
+  /* ask the desk */
+  .askjump{display:inline-flex; align-items:center; gap:8px; color:var(--gold-l); border:1.5px solid var(--gold-l); border-radius:999px; padding:10px 16px; font-weight:700; font-size:15px; text-decoration:none;}
+  .ask{background:linear-gradient(180deg, rgba(201,151,26,.12), rgba(201,151,26,.02) 60%); border:1px solid rgba(226,183,64,.4); border-radius:16px; padding:18px; scroll-margin-top:12px;}
+  .thread{display:flex; flex-direction:column; gap:10px;}
+  .thread:empty{display:none;}
+  .bubble{max-width:94%; border-radius:16px; padding:11px 14px; display:flex; flex-direction:column; gap:9px; min-width:0; scroll-margin-top:14px;}
+  .bubble p{margin:0;}
+  .bubble.me{align-self:flex-end; background:var(--gold-l); color:#0A0A0B; font-weight:700; border-bottom-right-radius:5px;}
+  .bubble.desk{align-self:flex-start; background:var(--raised); border:1px solid var(--line); border-bottom-left-radius:5px;}
+  .typing{display:inline-flex; gap:5px; padding:4px 0;}
+  .typing i{width:8px; height:8px; border-radius:50%; background:var(--gold); animation:blink 1.1s infinite ease-in-out;}
+  .typing i:nth-child(2){animation-delay:.18s;} .typing i:nth-child(3){animation-delay:.36s;}
+  @keyframes blink{0%,80%,100%{opacity:.25} 40%{opacity:1}}
+  @media (prefers-reduced-motion:reduce){ .typing i{animation:none;} }
+  .qchips{display:flex; flex-wrap:wrap; gap:8px;}
+  .qchip{background:var(--raised); color:var(--cream); border:1.5px solid var(--line); border-radius:999px; padding:8px 13px; font-weight:600; font-size:14.5px; cursor:pointer; text-align:left;}
+  .qchip:hover{border-color:var(--gold-l);}
+  .qchip.seen{color:var(--grey-dim);}
+  .ask-form{display:flex; gap:8px;}
+  .ask-form input{flex:1; min-width:0; background:var(--bg); border:1.5px solid var(--line); border-radius:999px; padding:12px 16px; color:#fff; font-size:16px; font-weight:500;}
+  .ask-form input:focus{border-color:var(--gold-l); outline:none;}
+  .ask-send{background:var(--gold-l); color:#0A0A0B; border:0; border-radius:999px; padding:0 20px; font-weight:700; font-size:16px; cursor:pointer;}
+  .sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap;}
+  .wa{align-self:flex-start; display:inline-flex; align-items:center; gap:8px; border:1.5px solid var(--good); color:var(--good); border-radius:999px; padding:8px 14px; font-weight:700; font-size:14.5px; text-decoration:none;}
+  .score{display:flex; flex-direction:column; gap:10px;}
+  .score-top{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px;}
+  .score-big{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px 12px; display:flex; flex-direction:column; gap:5px; min-width:0;}
+  .score-big .n{font-family:var(--f-display); font-weight:700; font-size:28px; line-height:1; color:#fff;}
+  .score-big .n small{font-family:var(--f-body); font-size:14px; color:var(--grey); font-weight:600;}
+  .verdict{font-weight:700; color:#fff;}
+  .stars{position:relative; display:inline-block; font-family:'Segoe UI Symbol','Noto Sans Symbols 2','Apple Symbols',sans-serif; font-size:19px; letter-spacing:2px; line-height:1; color:#45423a; white-space:nowrap;}
+  .stars::before{content:"\2605\2605\2605\2605\2605";}
+  .stars > span{position:absolute; left:0; top:0; bottom:0; overflow:hidden; color:var(--gold-l);}
+  .stars > span::before{content:"\2605\2605\2605\2605\2605";}
+  .dim{border-top:1px solid var(--line); padding-top:9px; display:flex; flex-direction:column; gap:4px;}
+  .dim-head{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:4px 10px;}
+  .dim-name{font-weight:700; color:#fff;}
+  .dim p{font-size:15px; color:var(--grey);}
+  .gates{list-style:none; margin:2px 0 0; padding:0; display:flex; flex-direction:column; gap:3px; font-size:15px; color:var(--grey);}
+  .gates b{display:inline-block; width:1.4em; font-weight:700;}
+  .gates .met b{color:var(--good);} .gates .unmet b{color:var(--live);}
+  .rubric{background:var(--card);}
+  .rubric summary{font-size:14.5px; padding:9px 12px;}
+  .rubric ul{margin:0; padding:0 14px 12px 30px; font-size:14px; color:var(--grey); display:flex; flex-direction:column; gap:5px;}
+  .yourturn{display:flex; flex-wrap:wrap; align-items:center; gap:2px 6px; border-top:1px solid var(--line); padding-top:9px;}
+  .yourturn .lbl{width:100%;}
+  .starbtn{background:none; border:0; font-family:'Segoe UI Symbol','Noto Sans Symbols 2','Apple Symbols',sans-serif; font-size:30px; line-height:1; color:#45423a; cursor:pointer; padding:4px 3px;}
+  .starbtn.on, .starbtn:hover{color:var(--gold-l);}
+
   .list{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:10px;}
   .list li{display:grid; grid-template-columns:22px minmax(0,1fr); gap:8px; align-items:start;}
   .list li::before{content:""; width:10px; height:10px; margin-top:8px; border-radius:2px; background:var(--gold);}
@@ -220,10 +269,22 @@
         <svg viewBox="0 0 16 16" aria-hidden="true" id="playIcon"><path d="M3 1.8v12.4L14 8z" fill="currentColor"/></svg>
         <span id="playLabel">Play briefing</span>
       </button>
+      <a class="askjump" id="askJump" href="#askSection" hidden>Ask the desk</a>
       <span class="play-status" id="playStatus" aria-live="polite"></span>
     </div>
   </div>
   <div class="numbers" id="numbers"></div>
+  <section class="ask" id="askSection" hidden>
+    <h2>Ask the desk</h2>
+    <p class="intro">Tap a question or type your own. The answers come from this edition's record, so they stay honest, good news and bad.</p>
+    <div class="thread" id="thread" aria-live="polite"></div>
+    <div class="qchips" id="askChips"></div>
+    <form class="ask-form" id="askForm" autocomplete="off">
+      <label for="askInput" class="sr">Your question</label>
+      <input id="askInput" type="text" maxlength="200" placeholder="Type a question…" enterkeyhint="send">
+      <button class="ask-send" type="submit">Ask</button>
+    </form>
+  </section>
   <section id="whoSection">
     <h2>Who did what</h2>
     <div class="credits" id="credits"></div>
@@ -412,6 +473,8 @@
     (ed.glossary || []).forEach(function(g){ var d = el('div'); d.appendChild(el('dt', null, g.term)); d.appendChild(el('dd', null, g.meaning)); gl.appendChild(d); });
     $('glossSection').hidden = !(ed.glossary && ed.glossary.length);
 
+    STATUS = st; setupAsk();
+
     var ar = $('archive'); ar.innerHTML = ''; var past = eds.slice(1);
     if (!past.length) ar.appendChild(el('p', 'empty', 'This is the first edition. Past editions will collect here.'));
     past.forEach(function(p){
@@ -427,6 +490,187 @@
     });
     $('foot').textContent = 'Nahum · QAELUM Oracle Intelligence · private broadcast · repository state ' + ed.head_commit;
   }
+
+  // ── Ask the desk. Every answer is written into the edition when it is produced, from the
+  // repository record, and checked by a script before publishing. Nothing is generated here
+  // and nothing leaves the phone, except a question or rating the viewer chooses to send to
+  // Nahum through WhatsApp.
+  var STATUS = {}, ASK = null;
+  var REDUCE = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var thread = $('thread');
+
+  function normQ(s){ return String(s || '').toLowerCase().replace(/[‘’]/g, "'").replace(/[^a-z0-9' ]+/g, ' ').replace(/\s+/g, ' ').trim(); }
+  function tokensOf(t){
+    var set = {};
+    t.split(' ').forEach(function(w){
+      if (!w) return; set[w] = 1;
+      if (/'s$/.test(w)) set[w.slice(0, -2)] = 1;
+      else if (w.length > 3 && /s$/.test(w)) set[w.slice(0, -1)] = 1;
+    });
+    return set;
+  }
+  function keyScore(text, toks, key){
+    var k = normQ(key); if (!k) return 0;
+    if (k.indexOf(' ') > -1) return (' ' + text + ' ').indexOf(' ' + k + ' ') > -1 ? k.split(' ').length : 0;
+    return toks[k] ? 1 : 0;
+  }
+  function glossAliases(term){
+    var out = [], inner = /\(([^)]+)\)/.exec(term), base = term.replace(/\([^)]*\)/g, '').trim();
+    if (base) out.push(base); if (inner) out.push(inner[1]);
+    return out;
+  }
+  // Best-matching answers for a typed question, highest score first, one per answer.
+  function matchQ(raw){
+    var text = normQ(raw), toks = tokensOf(text), best = {};
+    function offer(it, s){ if (s > 0 && (!best[it.id] || best[it.id].s < s)) best[it.id] = {it: it, s: s}; }
+    (ASK.items || []).forEach(function(it){
+      var s = normQ(it.q) === text ? 10 : 0;
+      (it.keys || []).forEach(function(k){ s += keyScore(text, toks, k); });
+      offer(it, s);
+    });
+    if (/\b(what|what's|whats|mean|means|meaning|define|explain|is a|is an)\b/.test(text)){
+      (ed.glossary || []).forEach(function(g){
+        glossAliases(g.term).forEach(function(al){
+          var s = keyScore(text, toks, al);
+          if (s) offer({id: 'g:' + g.term, q: 'What does ' + glossAliases(g.term)[0] + ' mean?', a: g.term + ': ' + g.meaning}, 0.5 + s);  // a prepared answer wins a tie
+        });
+      });
+    }
+    return Object.keys(best).map(function(k){ return best[k]; }).sort(function(a, b){ return b.s - a.s; });
+  }
+
+  function deskBubble(){ var b = el('div', 'bubble desk'); b.appendChild(el('span', 'lbl', 'Broadcast desk')); return b; }
+  function paras(parent, text){ String(text).split(/\n\n+/).forEach(function(p){ if (p.trim()) parent.appendChild(rich(el('p'), p)); }); }
+  function waLink(label, text){
+    var a = el('a', 'wa', label); a.href = 'https://wa.me/?text=' + encodeURIComponent(text); a.target = '_blank'; a.rel = 'noopener noreferrer'; return a;
+  }
+  function nextEditionText(){
+    if (STATUS.paused) return 'The broadcast is paused, so no edition is scheduled. Editions resume when Nahum switches it back on.';
+    var line = $('nextLine').textContent;
+    return (line ? line + '.' : 'The next edition date is not set yet.') + (STATUS.schedule ? ' Editions come out ' + STATUS.schedule + '.' : '');
+  }
+  function starsEl(v){
+    var s = el('span', 'stars'); s.setAttribute('role', 'img'); s.setAttribute('aria-label', v + ' out of 5 stars');
+    var f = el('span'); f.style.width = Math.max(0, Math.min(5, v)) / 5 * 100 + '%'; s.appendChild(f); return s;
+  }
+  function craftScore(){
+    var c = (ASK.scorecard.dims || []).filter(function(d){ return d.group === 'craft' && d.stars != null; });
+    return c.length ? c.reduce(function(t, d){ return t + d.stars; }, 0) / c.length : null;
+  }
+  function scoreCard(){
+    var sc = ASK.scorecard, wrap = el('div', 'score'), dims = sc.dims || [];
+    var craft = craftScore(), ready = dims.filter(function(d){ return d.group === 'ready' && d.stars != null; })[0];
+    var top = el('div', 'score-top');
+    function big(label, v){
+      var b = el('div', 'score-big'); b.appendChild(el('span', 'lbl', label));
+      var n = el('span', 'n', v == null ? '—' : v.toFixed(1).replace(/\.0$/, '')); n.appendChild(el('small', null, ' of 5')); b.appendChild(n);
+      if (v != null) b.appendChild(starsEl(v)); return b;
+    }
+    top.appendChild(big('Quality of the work', craft));
+    top.appendChild(big('Ready for the live network', ready ? ready.stars : null));
+    wrap.appendChild(top);
+    if (sc.verdict) wrap.appendChild(el('p', 'verdict', sc.verdict));
+    dims.forEach(function(d){
+      var r = el('div', 'dim'), h = el('div', 'dim-head');
+      h.appendChild(el('span', 'dim-name', d.name));
+      if (d.stars != null) h.appendChild(starsEl(d.stars)); else h.appendChild(el('span', 'lbl', 'Not scored'));
+      r.appendChild(h); if (d.evidence) r.appendChild(rich(el('p'), d.evidence));
+      if (d.gates && d.gates.length){
+        var ul = el('ul', 'gates');
+        d.gates.forEach(function(g){ var li = el('li', g.met ? 'met' : 'unmet'); li.appendChild(el('b', null, g.met ? '✓' : '✗')); li.appendChild(document.createTextNode(g.name)); ul.appendChild(li); });
+        r.appendChild(ul);
+      }
+      wrap.appendChild(r);
+    });
+    var det = el('details', 'rubric'); det.appendChild(el('summary', null, 'How this rating works'));
+    var ul = el('ul');
+    ['Reviews: share of merged changes with a written review from the other founder. All of them 5, at least 80% 4, at least 60% 3, at least 40% 2, less 1.',
+     'Tests: 5 if the whole suite passes, the automatic checks are green and new behaviour came with new tests; 4 if it passes and the checks are green; 2 if anything fails; 1 if it was not run.',
+     'Switched off until decided: 5 if every new reward rule ships switched off or was switched on by a recorded founder decision; 1 if one was switched on without one.',
+     'Honest claims: 5 if every claim challenged in review was corrected before merging and nothing known to be wrong remains; 3 if corrections came after merging; 1 if a known-wrong claim is still in the record.',
+     'Ready for the live network: 1 star, plus 1 for each gate met.',
+     'Quality of the work is the average of the first four. The two scores are never mixed, so good craft cannot hide an early stage.',
+     'Written by an AI reviewer from the repository record when each edition is produced, then checked by a script: every quote word for word, and the star arithmetic above.'
+    ].forEach(function(t){ ul.appendChild(el('li', null, t)); });
+    det.appendChild(ul); wrap.appendChild(det);
+
+    // The viewer's own rating, compared with the desk's, with an option to send it to Nahum.
+    var yt = el('div', 'yourturn'); yt.appendChild(el('span', 'lbl', 'Your turn: how would you rate the work?'));
+    var btns = [];
+    [1, 2, 3, 4, 5].forEach(function(n){
+      var b = el('button', 'starbtn', '★'); b.type = 'button'; b.setAttribute('aria-label', n + ' of 5');
+      b.addEventListener('click', function(){
+        btns.forEach(function(x, i){ x.className = 'starbtn' + (i < n ? ' on' : ''); });
+        var me = el('div', 'bubble me', 'My rating: ' + n + ' of 5');
+        reply(me, function(){
+          var d = deskBubble(), c = craftScore(), cs = c == null ? null : c.toFixed(1).replace(/\.0$/, ''), t;
+          if (c == null) t = 'Thanks. There is no desk score to compare with this edition.';
+          else if (Math.abs(n - c) < 1) t = 'Close to the desk’s ' + cs + ' for quality of the work.';
+          else if (n < c) t = 'Lower than the desk’s ' + cs + '. If something worries you, send it to Nahum and the next edition can look into it.';
+          else t = 'Higher than the desk’s ' + cs + '. The desk holds back wherever the record shows a gap.';
+          paras(d, t);
+          d.appendChild(waLink('Send my rating to Nahum', 'My rating for QAELUM Build Broadcast edition ' + ed.number + ': ' + n + ' of 5.'));
+          return d;
+        });
+      });
+      btns.push(b); yt.appendChild(b);
+    });
+    wrap.appendChild(yt);
+    return wrap;
+  }
+  function answerFor(it){
+    var b = deskBubble();
+    if (it.dynamic === 'next_edition') paras(b, nextEditionText()); else if (it.a) paras(b, it.a);
+    if (it.card === 'scorecard' && ASK.scorecard) b.appendChild(scoreCard());
+    return b;
+  }
+  // Show the viewer's bubble, a short typing pause, then the desk's bubble.
+  function reply(meBubble, makeAnswer){
+    thread.appendChild(meBubble);
+    var typing = deskBubble(), dots = el('span', 'typing'); dots.appendChild(el('i')); dots.appendChild(el('i')); dots.appendChild(el('i'));
+    typing.appendChild(dots); thread.appendChild(typing);
+    meBubble.scrollIntoView({block: 'start', behavior: REDUCE ? 'auto' : 'smooth'});
+    setTimeout(function(){
+      thread.replaceChild(makeAnswer(), typing);
+      while (thread.children.length > 14) thread.removeChild(thread.firstChild);
+      meBubble.scrollIntoView({block: 'start', behavior: 'auto'});
+    }, REDUCE ? 0 : 650);
+  }
+  function chipFor(it, onPick){
+    var b = el('button', 'qchip', it.q); b.type = 'button';
+    b.addEventListener('click', function(){ b.className = 'qchip seen'; onPick(it); });
+    return b;
+  }
+  function ask(it, asked){
+    reply(el('div', 'bubble me', asked || it.q), function(){ return answerFor(it); });
+  }
+  function askTyped(raw){
+    var q = String(raw || '').trim(); if (!q) return;
+    var hits = matchQ(q);
+    if (hits.length && (hits.length === 1 || hits[0].s > hits[1].s)) { ask(hits[0].it, q); return; }
+    reply(el('div', 'bubble me', q), function(){
+      var d = deskBubble();
+      if (hits.length){
+        paras(d, 'A few answers are close to that. Which one did you mean?');
+        var row = el('div', 'qchips'); hits.slice(0, 3).forEach(function(h){ row.appendChild(chipFor(h.it, function(it){ ask(it); })); }); d.appendChild(row);
+      } else {
+        paras(d, 'That one isn’t answered in this edition yet. Try a question below, or send it to Nahum so the next edition can answer it.');
+        d.appendChild(waLink('Send it to Nahum on WhatsApp', 'Question for the QAELUM Build Broadcast (edition ' + ed.number + '): ' + q));
+      }
+      return d;
+    });
+  }
+  function setupAsk(){
+    ASK = ed.ask && ed.ask.items && ed.ask.items.length ? ed.ask : null;
+    $('askSection').hidden = !ASK; $('askJump').hidden = !ASK;
+    thread.innerHTML = ''; var chips = $('askChips'); chips.innerHTML = '';
+    if (!ASK) return;
+    ASK.items.filter(function(it){ return it.chip; }).forEach(function(it){ chips.appendChild(chipFor(it, function(x){ ask(x); })); });
+  }
+  $('askForm').addEventListener('submit', function(ev){
+    ev.preventDefault(); var inp = $('askInput'); if (!ASK) return;
+    askTyped(inp.value); inp.value = ''; inp.blur();
+  });
 
   // ── spoken briefing: sentence by sentence, with a fallback timer per sentence
   // because Android Chrome does not always fire onend.

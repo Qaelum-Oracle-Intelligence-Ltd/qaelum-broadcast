@@ -8,6 +8,10 @@ For every change that names a PR, this checks:
   - every quoted phrase appears word for word in the review conversation of some PR
     in the folder (quotes may be cut with "..." and may end where the original goes on).
 
+For the "Ask the desk" answers and rating, it checks quotes in every answer and piece of
+evidence, that the Reviews stars follow the printed rule from the real review count,
+that readiness stars equal 1 plus the gates met, and that the test count matches.
+
 --prs is a folder holding, for each PR number n, the raw GitHub API responses:
     pr<n>.json   GET repos/{owner}/{repo}/pulls/<n>
     rev<n>.json  GET repos/{owner}/{repo}/pulls/<n>/reviews
@@ -46,6 +50,57 @@ def when(iso):
 def load(folder, kind, n):
     p = Path(folder) / f"{kind}{n}.json"
     return json.loads(p.read_text(encoding="utf-8")) if p.exists() else ([] if kind != "pr" else None)
+
+
+def check_quotes(tag, text, corpus, problems):
+    for q in re.findall(r'"([^"]+)"', text or ""):
+        for part in re.split(r"\.\.\.|…", q):
+            part = part.strip()
+            if part and norm(part) not in corpus:
+                problems.append(f"{tag}: quote not found word for word: {part!r}")
+
+
+def review_stars(reviewed, total):
+    """The Reviews rule printed on the page: share of merged changes with a written review."""
+    share = reviewed / total
+    return 5 if share >= 0.999 else 4 if share >= 0.8 else 3 if share >= 0.6 else 2 if share >= 0.4 else 1
+
+
+def check_ask(ed, corpus, problems):
+    """Answers and the rating: quotes word for word, and the rubric's arithmetic."""
+    ask = ed.get("ask")
+    if not ask:
+        return
+    for it in ask.get("items", []):
+        check_quotes(f"answer {it.get('id')!r}", it.get("a", ""), corpus, problems)
+        if not it.get("keys") and not it.get("dynamic"):
+            problems.append(f"answer {it.get('id')!r}: has no keys, so typed questions can never reach it")
+    sc = ask.get("scorecard") or {}
+    dims = {d.get("key"): d for d in sc.get("dims", [])}
+    for k, d in dims.items():
+        s = d.get("stars")
+        if s is not None and s not in (1, 2, 3, 4, 5):
+            problems.append(f"scorecard {k}: stars must be a whole number 1 to 5 (or null), got {s!r}")
+        check_quotes(f"scorecard {k}", d.get("evidence", ""), corpus, problems)
+    changes = ed.get("changes", [])
+    if "reviews" in dims and changes:
+        written = sum(1 for c in changes if c.get("people") and not re.match(r"(requested|no written)", c["people"].get("reviewed", "") or "no written", re.I))
+        want = review_stars(written, len(changes))
+        if dims["reviews"].get("stars") != want:
+            problems.append(f"scorecard reviews: {written} of {len(changes)} changes have a written review, so the rule gives {want} stars, not {dims['reviews'].get('stars')}")
+        m = re.search(r"(\d+) of (\d+) changes had a written review", dims["reviews"].get("evidence", ""))
+        if m and (int(m.group(1)), int(m.group(2))) != (written, len(changes)):
+            problems.append(f"scorecard reviews: evidence says {m.group(1)} of {m.group(2)}, the changes say {written} of {len(changes)}")
+    if "ready" in dims:
+        gates = dims["ready"].get("gates") or []
+        want = 1 + sum(1 for g in gates if g.get("met"))
+        if dims["ready"].get("stars") != want:
+            problems.append(f"scorecard ready: {want - 1} of {len(gates)} gates met, so the rule gives {want} stars, not {dims['ready'].get('stars')}")
+    if "tests" in dims and ed.get("numbers"):
+        shown = re.sub(r"\D", "", str(ed["numbers"][0].get("v", "")))
+        m = re.search(r"([\d,]+) tests pass", dims["tests"].get("evidence", ""))
+        if shown and m and re.sub(r"\D", "", m.group(1)) != shown:
+            problems.append(f"scorecard tests: evidence says {m.group(1)} tests pass, the numbers say {ed['numbers'][0].get('v')}")
 
 
 def main():
@@ -102,11 +157,9 @@ def main():
         for s in c.get("story") or []:
             if s.get("when") and s["when"] not in times:
                 problems.append(f"{tag}: no GitHub event at {s['when']!r} ({s.get('who')})")
-            for q in re.findall(r'"([^"]+)"', s.get("what", "")):
-                for part in re.split(r"\.\.\.|…", q):
-                    part = part.strip()
-                    if part and norm(part) not in corpus:
-                        problems.append(f"{tag}: quote not found word for word: {part!r}")
+            check_quotes(tag, s.get("what", ""), corpus, problems)
+
+    check_ask(ed, corpus, problems)
 
     if problems:
         print(f"{len(problems)} problem(s):")

@@ -8,6 +8,8 @@ Plain-English engineering updates on the QAELUM build, for a small named audienc
 
 `tools/make_master.py` builds Nahum's private master page from the same template, so the master and this page always look the same. Each change shows who opened, reviewed and merged it, with the review story in order.
 
-`tools/verify_edition.py` checks an edition against the GitHub record before it is published: line counts, who opened and merged each change, every story time, and every quote word for word.
+`tools/verify_edition.py` checks an edition against the GitHub record before it is published: line counts, who opened and merged each change, every story time, and every quote word for word. It also checks the "Ask the desk" answers: quotes word for word and the star arithmetic of the rating.
+
+The "Ask the desk" section answers questions from answers written into each edition. Nothing is generated in the page and nothing is sent anywhere, except a question or rating a viewer chooses to send to Nahum through WhatsApp.
 
 Nahum · QAELUM Oracle Intelligence
