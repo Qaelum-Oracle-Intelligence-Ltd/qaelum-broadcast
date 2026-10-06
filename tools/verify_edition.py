@@ -8,9 +8,11 @@ For every change that names a PR, this checks:
   - every quoted phrase appears word for word in the review conversation of some PR
     in the folder (quotes may be cut with "..." and may end where the original goes on).
 
-For the "Ask the desk" answers and rating, it checks quotes in every answer and piece of
-evidence, that the Reviews stars follow the printed rule from the real review count,
-that readiness stars equal 1 plus the gates met, and that the test count matches.
+For the "Ask the team" desks, it checks quotes in every answer and piece of evidence
+(PR text, plus any repository files passed with --docs), that the Reviews stars follow
+the printed rule from the real review count, that readiness stars equal 1 plus the gates
+met, that the test count matches, that each founder's Reviews given stars follow the rule,
+and that every measured response time starts and ends on a real GitHub event and adds up.
 
 --prs is a folder holding, for each PR number n, the raw GitHub API responses:
     pr<n>.json   GET repos/{owner}/{repo}/pulls/<n>
@@ -22,7 +24,7 @@ that readiness stars equal 1 plus the gates met, and that the test count matches
 Exit code 0 means every check passed. Anything else lists what failed.
 
 Usage:
-    python3 verify_edition.py --edition edition.json --prs prs/
+    python3 verify_edition.py --edition edition.json --prs prs/ --docs HANDOVER_V2.md PROGRESS.md
 """
 import argparse, json, re, sys
 from datetime import datetime, timedelta, timezone
@@ -66,15 +68,67 @@ def review_stars(reviewed, total):
     return 5 if share >= 0.999 else 4 if share >= 0.8 else 3 if share >= 0.6 else 2 if share >= 0.4 else 1
 
 
-def check_ask(ed, corpus, problems):
-    """Answers and the rating: quotes word for word, and the rubric's arithmetic."""
+def minutes_between(a, b, year):
+    fmt = "%Y %a %d %b, %I:%M %p"
+    t0, t1 = datetime.strptime(f"{year} {a}", fmt), datetime.strptime(f"{year} {b}", fmt)
+    return int((t1 - t0).total_seconds() // 60)
+
+
+def took_text(mins):
+    h, m = divmod(mins, 60)
+    return f"{h} h {m} min" if h else f"{m} min"
+
+
+def check_ask(ed, corpus, times, problems):
+    """Answers and the ratings: quotes word for word, measured times, and the rules' arithmetic."""
     ask = ed.get("ask")
     if not ask:
         return
-    for it in ask.get("items", []):
-        check_quotes(f"answer {it.get('id')!r}", it.get("a", ""), corpus, problems)
-        if not it.get("keys") and not it.get("dynamic"):
-            problems.append(f"answer {it.get('id')!r}: has no keys, so typed questions can never reach it")
+    desks = ask.get("desks") or [{"id": "desk", "items": ask.get("items", [])}]
+    for d in desks:
+        for it in d.get("items", []):
+            tag = f"answer {d.get('id')}/{it.get('id')}"
+            check_quotes(tag, it.get("a", ""), corpus, problems)
+            if it.get("own"):
+                if not (it["own"].get("text") and it["own"].get("date")):
+                    problems.append(f"{tag}: own words need both text and the date they were given")
+            if not it.get("keys") and not it.get("dynamic"):
+                problems.append(f"{tag}: has no keys, so typed questions can never reach it")
+            dyn = it.get("dynamic") or ""
+            if dyn.startswith("speed:") and dyn[6:] not in (ask.get("records") or {}):
+                problems.append(f"{tag}: points at a record for {dyn[6:]!r} that does not exist")
+            if (it.get("card") or "").startswith("person:") and it["card"][7:] not in (ask.get("records") or {}):
+                problems.append(f"{tag}: points at a record for {it['card'][7:]!r} that does not exist")
+
+    # Per-person records: the Reviews given rule from the changes, and every measured time.
+    year = (ed.get("date") or "2026")[:4]
+    changes = ed.get("changes", [])
+    people = list((ask.get("records") or {}).keys())
+    for name, rec in (ask.get("records") or {}).items():
+        for dm in rec.get("dims", []):
+            s = dm.get("stars")
+            if s is not None and s not in (1, 2, 3, 4, 5):
+                problems.append(f"record {name}/{dm.get('key')}: stars must be a whole number 1 to 5 (or null), got {s!r}")
+            check_quotes(f"record {name}/{dm.get('key')}", dm.get("evidence", ""), corpus, problems)
+            if dm.get("key") == "reviews_given":
+                others = [c for c in changes if (c.get("people") or {}).get("opened") in people and c["people"]["opened"] != name]
+                if others:
+                    done = sum(1 for c in others if (c["people"].get("reviewed") or "").startswith(name))
+                    want = review_stars(done, len(others))
+                    if s != want:
+                        problems.append(f"record {name}/reviews_given: reviewed {done} of {len(others)} of the other founder's changes, so the rule gives {want} stars, not {s}")
+        for grp in rec.get("speed", []):
+            for r in grp.get("rows", []):
+                tag = f"record {name} speed #{r.get('pr')} ({grp.get('label')})"
+                for k in ("from", "to"):
+                    if r.get(k) not in times:
+                        problems.append(f"{tag}: no GitHub event at {r.get(k)!r}")
+                try:
+                    want = took_text(minutes_between(r["from"], r["to"], year))
+                    if r.get("took") != want:
+                        problems.append(f"{tag}: says {r.get('took')!r}, the timestamps give {want!r}")
+                except (KeyError, ValueError) as e:
+                    problems.append(f"{tag}: cannot read the times ({e})")
     sc = ask.get("scorecard") or {}
     dims = {d.get("key"): d for d in sc.get("dims", [])}
     for k, d in dims.items():
@@ -107,6 +161,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--edition", required=True)
     ap.add_argument("--prs", required=True)
+    ap.add_argument("--docs", nargs="*", default=[],
+                    help="repository files whose text may also be quoted, e.g. HANDOVER_V2.md PROGRESS.md")
     a = ap.parse_args()
     ed = json.loads(Path(a.edition).read_text(encoding="utf-8"))
     problems = []
@@ -130,6 +186,8 @@ def main():
             texts.append(c["commit"]["message"])
             times.add(when(c["commit"]["committer"]["date"]))
             times.add(when(c["commit"]["author"]["date"]))
+    for f in a.docs:
+        texts.append(Path(f).read_text(encoding="utf-8"))
     corpus = norm("\n".join(texts))
 
     for i, c in enumerate(ed.get("changes", []), 1):
@@ -159,7 +217,7 @@ def main():
                 problems.append(f"{tag}: no GitHub event at {s['when']!r} ({s.get('who')})")
             check_quotes(tag, s.get("what", ""), corpus, problems)
 
-    check_ask(ed, corpus, problems)
+    check_ask(ed, corpus, times, problems)
 
     if problems:
         print(f"{len(problems)} problem(s):")

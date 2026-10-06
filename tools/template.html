@@ -172,7 +172,7 @@
   .score-big .n{font-family:var(--f-display); font-weight:700; font-size:28px; line-height:1; color:#fff;}
   .score-big .n small{font-family:var(--f-body); font-size:14px; color:var(--grey); font-weight:600;}
   .verdict{font-weight:700; color:#fff;}
-  .stars{position:relative; display:inline-block; font-family:'Segoe UI Symbol','Noto Sans Symbols 2','Apple Symbols',sans-serif; font-size:19px; letter-spacing:2px; line-height:1; color:#45423a; white-space:nowrap;}
+  .stars{position:relative; display:inline-block; width:max-content; align-self:flex-start; flex:none; font-family:'Segoe UI Symbol','Noto Sans Symbols 2','Apple Symbols',sans-serif; font-size:19px; letter-spacing:2px; line-height:1; color:#45423a; white-space:nowrap;}
   .stars::before{content:"\2605\2605\2605\2605\2605";}
   .stars > span{position:absolute; left:0; top:0; bottom:0; overflow:hidden; color:var(--gold-l);}
   .stars > span::before{content:"\2605\2605\2605\2605\2605";}
@@ -190,6 +190,31 @@
   .yourturn .lbl{width:100%;}
   .starbtn{background:none; border:0; font-family:'Segoe UI Symbol','Noto Sans Symbols 2','Apple Symbols',sans-serif; font-size:30px; line-height:1; color:#45423a; cursor:pointer; padding:4px 3px;}
   .starbtn.on, .starbtn:hover{color:var(--gold-l);}
+  .whoami{display:flex; flex-direction:column; gap:10px; background:var(--card); border:1.5px dashed rgba(226,183,64,.55); border-radius:12px; padding:12px 14px;}
+  .name-msg{margin:0; color:var(--warn); font-weight:700; font-size:15px;}
+  .asking{display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:15px; color:var(--grey);}
+  .asking b{color:var(--gold-l);}
+  .linkbtn{background:none; border:0; color:var(--gold-l); font-weight:700; font-size:14.5px; text-decoration:underline; text-underline-offset:3px; cursor:pointer; padding:4px;}
+  .desk-tabs{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px;}
+  .desk-tab{display:flex; flex-direction:column; align-items:center; gap:4px; background:var(--raised); border:1.5px solid var(--line); border-radius:12px; padding:10px 6px; color:var(--cream); cursor:pointer; text-align:center; min-width:0; font-family:var(--f-body);}
+  .desk-tab .av{width:34px; height:34px; border-radius:50%; display:grid; place-items:center; background:var(--card); border:1.5px solid var(--gold); color:var(--gold-l); font-family:var(--f-display); font-weight:700; font-size:17px;}
+  .desk-tab b{font-size:14.5px; line-height:1.2;}
+  .desk-tab small{font-size:11.5px; color:var(--grey-dim); font-weight:600; line-height:1.25;}
+  .desk-tab[aria-selected="true"]{border-color:var(--gold-l); background:rgba(226,183,64,.13);}
+  .desk-tab[aria-selected="true"] .av{background:var(--gold-l); color:#0A0A0B;}
+  .desk-note{margin:0; font-size:14px; color:var(--grey); border-left:3px solid var(--gold); padding-left:10px;}
+  .bubble .who-line{font-family:var(--f-mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase; font-weight:600; opacity:.7;}
+  .own{border:1px solid rgba(61,219,184,.5); background:rgba(61,219,184,.07); border-radius:10px; padding:9px 12px; display:flex; flex-direction:column; gap:4px;}
+  .own .lbl{color:var(--good);}
+  .speed{display:flex; flex-direction:column; gap:10px;}
+  .speed-g{display:flex; flex-direction:column; gap:4px; border-top:1px solid var(--line); padding-top:8px;}
+  .speed-row{display:flex; justify-content:space-between; gap:10px; font-size:15px;}
+  .speed-row .w{color:var(--grey);}
+  .speed-row .t{font-family:var(--f-mono); font-weight:600; color:#fff; white-space:nowrap;}
+  .srcs{display:flex; flex-direction:column; gap:3px; font-size:13.5px;}
+  .srcs a{color:var(--gold-l);}
+  .direct{align-self:flex-start; font-size:14.5px; font-weight:700; color:var(--good); text-underline-offset:3px;}
+  .qchip.more{border-style:dashed; color:var(--gold-l);}
 
   .list{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:10px;}
   .list li{display:grid; grid-template-columns:22px minmax(0,1fr); gap:8px; align-items:start;}
@@ -269,21 +294,35 @@
         <svg viewBox="0 0 16 16" aria-hidden="true" id="playIcon"><path d="M3 1.8v12.4L14 8z" fill="currentColor"/></svg>
         <span id="playLabel">Play briefing</span>
       </button>
-      <a class="askjump" id="askJump" href="#askSection" hidden>Ask the desk</a>
+      <a class="askjump" id="askJump" href="#askSection" hidden>Ask the team</a>
       <span class="play-status" id="playStatus" aria-live="polite"></span>
     </div>
   </div>
   <div class="numbers" id="numbers"></div>
   <section class="ask" id="askSection" hidden>
-    <h2>Ask the desk</h2>
-    <p class="intro">Tap a question or type your own. The answers come from this edition's record, so they stay honest, good news and bad.</p>
-    <div class="thread" id="thread" aria-live="polite"></div>
+    <h2>Ask the team</h2>
+    <p class="intro">Choose who to ask: either founder, or the independent reviewer. Tap a question or type your own. Answers come from this edition's record, so they stay honest, good news and bad.</p>
+    <div class="whoami" id="whoami">
+      <span class="lbl">First, who's asking?</span>
+      <div class="qchips" id="nameChips"></div>
+      <form class="ask-form" id="nameForm" autocomplete="off">
+        <label for="nameInput" class="sr">Your name</label>
+        <input id="nameInput" type="text" maxlength="40" placeholder="Or type your name" enterkeyhint="done" autocapitalize="words">
+        <button class="ask-send" type="submit">Save</button>
+      </form>
+      <p class="name-msg" id="nameMsg" hidden>Add your name first, so everyone knows who asked.</p>
+    </div>
+    <div class="asking" id="askingAs" hidden><span>Asking as <b id="askerName"></b></span><button type="button" class="linkbtn" id="changeName">Change</button></div>
+    <div class="desk-tabs" id="deskTabs" role="tablist" aria-label="Who to ask"></div>
+    <p class="desk-note" id="deskNote"></p>
+    <div id="threads"></div>
     <div class="qchips" id="askChips"></div>
     <form class="ask-form" id="askForm" autocomplete="off">
       <label for="askInput" class="sr">Your question</label>
       <input id="askInput" type="text" maxlength="200" placeholder="Type a question…" enterkeyhint="send">
       <button class="ask-send" type="submit">Ask</button>
     </form>
+    <a class="direct" id="deskDirect" href="#" target="_blank" rel="noopener noreferrer" hidden></a>
   </section>
   <section id="whoSection">
     <h2>Who did what</h2>
@@ -473,7 +512,7 @@
     (ed.glossary || []).forEach(function(g){ var d = el('div'); d.appendChild(el('dt', null, g.term)); d.appendChild(el('dd', null, g.meaning)); gl.appendChild(d); });
     $('glossSection').hidden = !(ed.glossary && ed.glossary.length);
 
-    STATUS = st; setupAsk();
+    STATUS = st; AUDIENCE = (DATA.audience || []).filter(function(n){ return typeof n === 'string' && n.trim(); }); setupAsk();
 
     var ar = $('archive'); ar.innerHTML = ''; var past = eds.slice(1);
     if (!past.length) ar.appendChild(el('p', 'empty', 'This is the first edition. Past editions will collect here.'));
@@ -491,13 +530,19 @@
     $('foot').textContent = 'Nahum · QAELUM Oracle Intelligence · private broadcast · repository state ' + ed.head_commit;
   }
 
-  // ── Ask the desk. Every answer is written into the edition when it is produced, from the
-  // repository record, and checked by a script before publishing. Nothing is generated here
-  // and nothing leaves the phone, except a question or rating the viewer chooses to send to
-  // Nahum through WhatsApp.
-  var STATUS = {}, ASK = null;
+  // ── Ask the team: a desk per founder plus an independent reviewer. Every answer is
+  // written into the edition when it is produced, from the repository record, and checked
+  // by a script before publishing. The founder desks only use what each founder actually
+  // wrote, measured facts, and answers the founders wrote themselves ("own"). Nothing is
+  // generated here and nothing leaves the phone, except a question or rating the viewer
+  // chooses to send through WhatsApp. The viewer's name stays on their own phone.
+  var STATUS = {}, ASK = null, AUDIENCE = [], DESKS = [], DESK = null, ASKER = '';
   var REDUCE = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var thread = $('thread');
+  var NAME_KEY = 'qaelum-broadcast-name';
+  var threads = {};
+  function loadName(){ try { return localStorage.getItem(NAME_KEY) || ''; } catch(e){ return ''; } }
+  function saveName(n){ try { localStorage.setItem(NAME_KEY, n); } catch(e){} }
+  function cleanName(s){ return String(s || '').replace(/[\u0000-\u001f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 40); }
 
   function normQ(s){ return String(s || '').toLowerCase().replace(/[‘’]/g, "'").replace(/[^a-z0-9' ]+/g, ' ').replace(/\s+/g, ' ').trim(); }
   function tokensOf(t){
@@ -519,11 +564,11 @@
     if (base) out.push(base); if (inner) out.push(inner[1]);
     return out;
   }
-  // Best-matching answers for a typed question, highest score first, one per answer.
-  function matchQ(raw){
+  // Best-matching answers on one desk for a typed question, highest score first.
+  function matchQ(raw, items){
     var text = normQ(raw), toks = tokensOf(text), best = {};
     function offer(it, s){ if (s > 0 && (!best[it.id] || best[it.id].s < s)) best[it.id] = {it: it, s: s}; }
-    (ASK.items || []).forEach(function(it){
+    items.forEach(function(it){
       var s = normQ(it.q) === text ? 10 : 0;
       (it.keys || []).forEach(function(k){ s += keyScore(text, toks, k); });
       offer(it, s);
@@ -539,8 +584,14 @@
     return Object.keys(best).map(function(k){ return best[k]; }).sort(function(a, b){ return b.s - a.s; });
   }
 
-  function deskBubble(){ var b = el('div', 'bubble desk'); b.appendChild(el('span', 'lbl', 'Broadcast desk')); return b; }
+  function fmt1(v){ return v == null ? '—' : v.toFixed(1).replace(/\.0$/, ''); }
+  function shortDate(iso){ var p = String(iso || '').split('-').map(Number); return p.length === 3 ? p[2] + ' ' + MONTHS[p[1] - 1].slice(0, 3) : ''; }
+  function deskBubble(desk){ var b = el('div', 'bubble desk'); b.appendChild(el('span', 'lbl', desk.label || desk.name)); return b; }
+  function meBubble(text, desk){
+    var b = el('div', 'bubble me'); b.appendChild(el('span', 'who-line', ASKER + ' → ' + desk.name)); b.appendChild(el('span', null, text)); return b;
+  }
   function paras(parent, text){ String(text).split(/\n\n+/).forEach(function(p){ if (p.trim()) parent.appendChild(rich(el('p'), p)); }); }
+  function waText(desk, q){ return 'From ' + ASKER + ', for ' + desk.send_to + ': ' + q + ' (QAELUM Build Broadcast, edition ' + ed.number + ')'; }
   function waLink(label, text){
     var a = el('a', 'wa', label); a.href = 'https://wa.me/?text=' + encodeURIComponent(text); a.target = '_blank'; a.rel = 'noopener noreferrer'; return a;
   }
@@ -550,66 +601,67 @@
     return (line ? line + '.' : 'The next edition date is not set yet.') + (STATUS.schedule ? ' Editions come out ' + STATUS.schedule + '.' : '');
   }
   function starsEl(v){
-    var s = el('span', 'stars'); s.setAttribute('role', 'img'); s.setAttribute('aria-label', v + ' out of 5 stars');
-    var f = el('span'); f.style.width = Math.max(0, Math.min(5, v)) / 5 * 100 + '%'; s.appendChild(f); return s;
+    var s = el('span', 'stars'); s.setAttribute('role', 'img'); s.setAttribute('aria-label', fmt1(v) + ' out of 5 stars');
+    var f = el('span'); f.style.width = Math.max(0, Math.min(5, v || 0)) / 5 * 100 + '%'; s.appendChild(f); return s;
   }
-  function craftScore(){
-    var c = (ASK.scorecard.dims || []).filter(function(d){ return d.group === 'craft' && d.stars != null; });
-    return c.length ? c.reduce(function(t, d){ return t + d.stars; }, 0) / c.length : null;
-  }
-  function scoreCard(){
-    var sc = ASK.scorecard, wrap = el('div', 'score'), dims = sc.dims || [];
-    var craft = craftScore(), ready = dims.filter(function(d){ return d.group === 'ready' && d.stars != null; })[0];
-    var top = el('div', 'score-top');
-    function big(label, v){
-      var b = el('div', 'score-big'); b.appendChild(el('span', 'lbl', label));
-      var n = el('span', 'n', v == null ? '—' : v.toFixed(1).replace(/\.0$/, '')); n.appendChild(el('small', null, ' of 5')); b.appendChild(n);
-      if (v != null) b.appendChild(starsEl(v)); return b;
+  function average(dims){ var d = dims.filter(function(x){ return x.stars != null; }); return d.length ? d.reduce(function(t, x){ return t + x.stars; }, 0) / d.length : null; }
+  function craftScore(){ return average((ASK.scorecard.dims || []).filter(function(d){ return d.group === 'craft'; })); }
+  function dimRow(d){
+    var r = el('div', 'dim'), h = el('div', 'dim-head');
+    h.appendChild(el('span', 'dim-name', d.name));
+    if (d.stars != null) h.appendChild(starsEl(d.stars)); else h.appendChild(el('span', 'lbl', 'Not scored'));
+    r.appendChild(h); if (d.evidence) r.appendChild(rich(el('p'), d.evidence));
+    if (d.gates && d.gates.length){
+      var ul = el('ul', 'gates');
+      d.gates.forEach(function(g){ var li = el('li', g.met ? 'met' : 'unmet'); li.appendChild(el('b', null, g.met ? '✓' : '✗')); li.appendChild(document.createTextNode(g.name)); ul.appendChild(li); });
+      r.appendChild(ul);
     }
-    top.appendChild(big('Quality of the work', craft));
-    top.appendChild(big('Ready for the live network', ready ? ready.stars : null));
+    return r;
+  }
+  function rules(title, lines){
+    var det = el('details', 'rubric'); det.appendChild(el('summary', null, title));
+    var ul = el('ul'); lines.forEach(function(t){ ul.appendChild(el('li', null, t)); }); det.appendChild(ul); return det;
+  }
+  function scoreBig(label, v){
+    var b = el('div', 'score-big'); b.appendChild(el('span', 'lbl', label));
+    var n = el('span', 'n', fmt1(v)); n.appendChild(el('small', null, ' of 5')); b.appendChild(n);
+    if (v != null) b.appendChild(starsEl(v)); return b;
+  }
+
+  // The team scorecard, plus the viewer's own rating.
+  function scoreCard(desk){
+    var sc = ASK.scorecard, wrap = el('div', 'score'), dims = sc.dims || [];
+    var ready = dims.filter(function(d){ return d.group === 'ready' && d.stars != null; })[0];
+    var top = el('div', 'score-top');
+    top.appendChild(scoreBig('Quality of the work', craftScore()));
+    top.appendChild(scoreBig('Ready for the live network', ready ? ready.stars : null));
     wrap.appendChild(top);
     if (sc.verdict) wrap.appendChild(el('p', 'verdict', sc.verdict));
-    dims.forEach(function(d){
-      var r = el('div', 'dim'), h = el('div', 'dim-head');
-      h.appendChild(el('span', 'dim-name', d.name));
-      if (d.stars != null) h.appendChild(starsEl(d.stars)); else h.appendChild(el('span', 'lbl', 'Not scored'));
-      r.appendChild(h); if (d.evidence) r.appendChild(rich(el('p'), d.evidence));
-      if (d.gates && d.gates.length){
-        var ul = el('ul', 'gates');
-        d.gates.forEach(function(g){ var li = el('li', g.met ? 'met' : 'unmet'); li.appendChild(el('b', null, g.met ? '✓' : '✗')); li.appendChild(document.createTextNode(g.name)); ul.appendChild(li); });
-        r.appendChild(ul);
-      }
-      wrap.appendChild(r);
-    });
-    var det = el('details', 'rubric'); det.appendChild(el('summary', null, 'How this rating works'));
-    var ul = el('ul');
-    ['Reviews: share of merged changes with a written review from the other founder. All of them 5, at least 80% 4, at least 60% 3, at least 40% 2, less 1.',
-     'Tests: 5 if the whole suite passes, the automatic checks are green and new behaviour came with new tests; 4 if it passes and the checks are green; 2 if anything fails; 1 if it was not run.',
-     'Switched off until decided: 5 if every new reward rule ships switched off or was switched on by a recorded founder decision; 1 if one was switched on without one.',
-     'Honest claims: 5 if every claim challenged in review was corrected before merging and nothing known to be wrong remains; 3 if corrections came after merging; 1 if a known-wrong claim is still in the record.',
-     'Ready for the live network: 1 star, plus 1 for each gate met.',
-     'Quality of the work is the average of the first four. The two scores are never mixed, so good craft cannot hide an early stage.',
-     'Written by an AI reviewer from the repository record when each edition is produced, then checked by a script: every quote word for word, and the star arithmetic above.'
-    ].forEach(function(t){ ul.appendChild(el('li', null, t)); });
-    det.appendChild(ul); wrap.appendChild(det);
-
-    // The viewer's own rating, compared with the desk's, with an option to send it to Nahum.
+    dims.forEach(function(d){ wrap.appendChild(dimRow(d)); });
+    wrap.appendChild(rules('How this rating works', [
+      'Reviews: share of merged changes with a written review from the other founder. All of them 5, at least 80% 4, at least 60% 3, at least 40% 2, less 1.',
+      'Tests: 5 if the whole suite passes, the automatic checks are green and new behaviour came with new tests; 4 if it passes and the checks are green; 2 if anything fails; 1 if it was not run.',
+      'Switched off until decided: 5 if every new reward rule ships switched off or was switched on by a recorded founder decision; 1 if one was switched on without one.',
+      'Honest claims: 5 if every claim challenged in review was corrected before merging and nothing known to be wrong remains; 3 if corrections came after merging; 1 if a known-wrong claim is still in the record.',
+      'Ready for the live network: 1 star, plus 1 for each gate met.',
+      'Quality of the work is the average of the first four. The two scores are never mixed, so good craft cannot hide an early stage.',
+      'Written by an AI reviewer from the repository record when each edition is produced, then checked by a script: every quote word for word, and the star arithmetic above.'
+    ]));
     var yt = el('div', 'yourturn'); yt.appendChild(el('span', 'lbl', 'Your turn: how would you rate the work?'));
     var btns = [];
     [1, 2, 3, 4, 5].forEach(function(n){
       var b = el('button', 'starbtn', '★'); b.type = 'button'; b.setAttribute('aria-label', n + ' of 5');
       b.addEventListener('click', function(){
+        if (!requireName()) return;
         btns.forEach(function(x, i){ x.className = 'starbtn' + (i < n ? ' on' : ''); });
-        var me = el('div', 'bubble me', 'My rating: ' + n + ' of 5');
-        reply(me, function(){
-          var d = deskBubble(), c = craftScore(), cs = c == null ? null : c.toFixed(1).replace(/\.0$/, ''), t;
+        reply(desk, meBubble('My rating: ' + n + ' of 5', desk), function(){
+          var d = deskBubble(desk), c = craftScore(), cs = fmt1(c), t;
           if (c == null) t = 'Thanks. There is no desk score to compare with this edition.';
-          else if (Math.abs(n - c) < 1) t = 'Close to the desk’s ' + cs + ' for quality of the work.';
-          else if (n < c) t = 'Lower than the desk’s ' + cs + '. If something worries you, send it to Nahum and the next edition can look into it.';
-          else t = 'Higher than the desk’s ' + cs + '. The desk holds back wherever the record shows a gap.';
+          else if (Math.abs(n - c) < 1) t = 'Close to the reviewer’s ' + cs + ' for quality of the work.';
+          else if (n < c) t = 'Lower than the reviewer’s ' + cs + '. If something worries you, send it to Nahum and the next edition can look into it.';
+          else t = 'Higher than the reviewer’s ' + cs + '. The reviewer holds back wherever the record shows a gap.';
           paras(d, t);
-          d.appendChild(waLink('Send my rating to Nahum', 'My rating for QAELUM Build Broadcast edition ' + ed.number + ': ' + n + ' of 5.'));
+          d.appendChild(waLink('Send my rating to ' + desk.send_to, 'From ' + ASKER + ': my rating for QAELUM Build Broadcast edition ' + ed.number + ' is ' + n + ' of 5.'));
           return d;
         });
       });
@@ -618,58 +670,163 @@
     wrap.appendChild(yt);
     return wrap;
   }
-  function answerFor(it){
-    var b = deskBubble();
+
+  // One founder's record: the same rules for both founders.
+  function personCard(name, desk){
+    var rec = (ASK.records || {})[name], wrap = el('div', 'score');
+    if (!rec) return wrap;
+    wrap.appendChild(scoreBig(name + '’s record this period', average(rec.dims || [])));
+    (rec.dims || []).forEach(function(d){ wrap.appendChild(dimRow(d)); });
+    wrap.appendChild(rules('How this record works', [
+      'Reviews given: share of the other founder’s merged changes they reviewed in writing. All 5, at least 80% 4, at least 60% 3, at least 40% 2, less 1.',
+      'Fixes what’s asked: 5 if everything the reviewer marked as needed was fixed before merging; 3 if some was fixed after; 1 if something was merged unfixed.',
+      'Ships safely: 5 if their new reward rules ship switched off and their new behaviour came with new tests; 3 if one of those is missing; 1 if both are.',
+      'Honest claims: 5 if every claim of theirs challenged in review was corrected before merging; 3 if corrected after; 1 if a known-wrong claim remains.',
+      'The number at the top is the average of the four. Speed is shown elsewhere but not scored, because the record doesn’t show anyone’s working hours or time zone.',
+      'The same rules are used for both founders. Measured from GitHub by the AI reviewer and checked by a script before publishing.'
+    ]));
+    wrap.appendChild(el('p', 'fine', 'This is the record, not ' + desk.name + '’s opinion.'));
+    return wrap;
+  }
+  function speedEl(name){
+    var rec = (ASK.records || {})[name], w = el('div', 'speed');
+    ((rec && rec.speed) || []).forEach(function(g){
+      var ge = el('div', 'speed-g'); ge.appendChild(el('span', 'lbl', g.label));
+      (g.rows || []).forEach(function(r){
+        var row = el('div', 'speed-row'); row.title = r.from + ' → ' + r.to;
+        row.appendChild(el('span', 'w', '#' + r.pr + (r.note ? ' (' + r.note + ')' : '')));
+        row.appendChild(el('span', 't', r.took)); ge.appendChild(row);
+      });
+      w.appendChild(ge);
+    });
+    return w;
+  }
+
+  function answerFor(it, desk){
+    var b = deskBubble(desk);
+    if (it.own && it.own.text){
+      var o = el('div', 'own'); o.appendChild(el('span', 'lbl', 'In ' + desk.name + '’s own words' + (it.own.date ? ' · ' + shortDate(it.own.date) : '')));
+      paras(o, it.own.text); b.appendChild(o);
+    }
     if (it.dynamic === 'next_edition') paras(b, nextEditionText()); else if (it.a) paras(b, it.a);
-    if (it.card === 'scorecard' && ASK.scorecard) b.appendChild(scoreCard());
+    if (it.dynamic && it.dynamic.indexOf('speed:') === 0) b.appendChild(speedEl(it.dynamic.slice(6)));
+    if (it.card === 'scorecard' && ASK.scorecard) b.appendChild(scoreCard(desk));
+    else if (it.card && it.card.indexOf('person:') === 0) b.appendChild(personCard(it.card.slice(7), desk));
+    if (it.sources && it.sources.length){
+      var s = el('div', 'srcs'); s.appendChild(el('span', 'lbl', 'Sources'));
+      it.sources.forEach(function(src){ var a = el('a', null, src.t); a.href = src.u; a.target = '_blank'; a.rel = 'noopener noreferrer'; s.appendChild(a); });
+      b.appendChild(s);
+    }
+    if (desk.id !== 'review' && !(it.own && it.own.text) && desk.send_to) b.appendChild(waLink('Ask ' + desk.send_to + ' for his own answer', waText(desk, it.q)));
     return b;
   }
-  // Show the viewer's bubble, a short typing pause, then the desk's bubble.
-  function reply(meBubble, makeAnswer){
-    thread.appendChild(meBubble);
-    var typing = deskBubble(), dots = el('span', 'typing'); dots.appendChild(el('i')); dots.appendChild(el('i')); dots.appendChild(el('i'));
-    typing.appendChild(dots); thread.appendChild(typing);
-    meBubble.scrollIntoView({block: 'start', behavior: REDUCE ? 'auto' : 'smooth'});
+  // The viewer's bubble, a short typing pause, then the desk's bubble.
+  function reply(desk, me, makeAnswer){
+    var th = threads[desk.id]; th.appendChild(me);
+    var typing = deskBubble(desk), dots = el('span', 'typing'); dots.appendChild(el('i')); dots.appendChild(el('i')); dots.appendChild(el('i'));
+    typing.appendChild(dots); th.appendChild(typing);
+    me.scrollIntoView({block: 'start', behavior: REDUCE ? 'auto' : 'smooth'});
     setTimeout(function(){
-      thread.replaceChild(makeAnswer(), typing);
-      while (thread.children.length > 14) thread.removeChild(thread.firstChild);
-      meBubble.scrollIntoView({block: 'start', behavior: 'auto'});
+      th.replaceChild(makeAnswer(), typing);
+      while (th.children.length > 14) th.removeChild(th.firstChild);
+      me.scrollIntoView({block: 'start', behavior: 'auto'});
     }, REDUCE ? 0 : 650);
   }
-  function chipFor(it, onPick){
+  function requireName(){
+    if (ASKER) return true;
+    $('nameMsg').hidden = false; $('whoami').hidden = false; $('askingAs').hidden = true;
+    $('whoami').scrollIntoView({block: 'center', behavior: REDUCE ? 'auto' : 'smooth'});
+    try { $('nameInput').focus({preventScroll: true}); } catch(e){}
+    return false;
+  }
+  function askItem(it, asked){
+    if (!requireName()) return;
+    var desk = DESK; reply(desk, meBubble(asked || it.q, desk), function(){ return answerFor(it, desk); });
+  }
+  function chipFor(it){
     var b = el('button', 'qchip', it.q); b.type = 'button';
-    b.addEventListener('click', function(){ b.className = 'qchip seen'; onPick(it); });
+    b.addEventListener('click', function(){ if (!ASKER){ requireName(); return; } b.className = 'qchip seen'; askItem(it); });
     return b;
   }
-  function ask(it, asked){
-    reply(el('div', 'bubble me', asked || it.q), function(){ return answerFor(it); });
-  }
   function askTyped(raw){
-    var q = String(raw || '').trim(); if (!q) return;
-    var hits = matchQ(q);
-    if (hits.length && (hits.length === 1 || hits[0].s > hits[1].s)) { ask(hits[0].it, q); return; }
-    reply(el('div', 'bubble me', q), function(){
-      var d = deskBubble();
+    var q = String(raw || '').trim(); if (!q || !requireName()) return false;
+    var desk = DESK, hits = matchQ(q, desk.items || []);
+    if (hits.length && (hits.length === 1 || hits[0].s > hits[1].s)) { askItem(hits[0].it, q); return true; }
+    reply(desk, meBubble(q, desk), function(){
+      var d = deskBubble(desk);
       if (hits.length){
         paras(d, 'A few answers are close to that. Which one did you mean?');
-        var row = el('div', 'qchips'); hits.slice(0, 3).forEach(function(h){ row.appendChild(chipFor(h.it, function(it){ ask(it); })); }); d.appendChild(row);
+        var row = el('div', 'qchips'); hits.slice(0, 3).forEach(function(h){ row.appendChild(chipFor(h.it)); }); d.appendChild(row);
       } else {
-        paras(d, 'That one isn’t answered in this edition yet. Try a question below, or send it to Nahum so the next edition can answer it.');
-        d.appendChild(waLink('Send it to Nahum on WhatsApp', 'Question for the QAELUM Build Broadcast (edition ' + ed.number + '): ' + q));
+        paras(d, desk.id === 'review'
+          ? 'That one isn’t answered in this edition yet. Try a question below, or send it to Nahum so the next edition can answer it.'
+          : desk.name + ' hasn’t answered that here yet. Send it to him and his answer can appear in his own words in the next edition.');
+        d.appendChild(waLink('Send it to ' + desk.send_to + ' on WhatsApp', waText(desk, q)));
       }
       return d;
     });
+    return true;
+  }
+
+  function renderChips(){
+    var box = $('askChips'); box.innerHTML = '';
+    var items = DESK.items || [], main = items.filter(function(it){ return it.chip; }), rest = items.filter(function(it){ return !it.chip; });
+    main.forEach(function(it){ box.appendChild(chipFor(it)); });
+    if (rest.length){
+      var more = el('button', 'qchip more', 'More questions'); more.type = 'button';
+      more.addEventListener('click', function(){ more.remove(); rest.forEach(function(it){ box.appendChild(chipFor(it)); }); });
+      box.appendChild(more);
+    }
+  }
+  function switchDesk(id){
+    DESK = DESKS.filter(function(d){ return d.id === id; })[0] || DESKS[0];
+    Array.prototype.forEach.call($('deskTabs').children, function(t){ var on = t.dataset.id === DESK.id; t.setAttribute('aria-selected', on ? 'true' : 'false'); t.tabIndex = on ? 0 : -1; });
+    Object.keys(threads).forEach(function(k){ threads[k].hidden = k !== DESK.id; });
+    $('deskNote').textContent = DESK.note || ''; $('deskNote').hidden = !DESK.note;
+    $('askInput').placeholder = 'Ask ' + (DESK.id === 'review' ? 'the reviewer' : DESK.name) + ' a question…';
+    var dl = $('deskDirect');
+    if (DESK.id !== 'review' && DESK.send_to){ dl.hidden = false; dl.href = '#'; dl.textContent = 'Message ' + DESK.send_to + ' directly on WhatsApp'; }
+    else dl.hidden = true;
+    renderChips();
+  }
+  function setName(n){
+    n = cleanName(n); if (!n) return;
+    ASKER = n; saveName(n);
+    $('askerName').textContent = n; $('whoami').hidden = true; $('askingAs').hidden = false; $('nameMsg').hidden = true;
   }
   function setupAsk(){
-    ASK = ed.ask && ed.ask.items && ed.ask.items.length ? ed.ask : null;
+    ASK = ed.ask && ((ed.ask.desks && ed.ask.desks.length) || (ed.ask.items && ed.ask.items.length)) ? ed.ask : null;
     $('askSection').hidden = !ASK; $('askJump').hidden = !ASK;
-    thread.innerHTML = ''; var chips = $('askChips'); chips.innerHTML = '';
     if (!ASK) return;
-    ASK.items.filter(function(it){ return it.chip; }).forEach(function(it){ chips.appendChild(chipFor(it, function(x){ ask(x); })); });
+    DESKS = ASK.desks || [{id: 'review', name: 'the desk', tab: 'Ask the desk', label: 'Broadcast desk', send_to: 'Nahum', items: ASK.items}];
+    var roles = {}; (ed.credits || []).forEach(function(c){ roles[c.name] = c.role; });
+    var tabs = $('deskTabs'), box = $('threads'); tabs.innerHTML = ''; box.innerHTML = ''; threads = {};
+    DESKS.forEach(function(d){
+      var t = el('button', 'desk-tab'); t.type = 'button'; t.setAttribute('role', 'tab'); t.dataset.id = d.id;
+      t.appendChild(el('span', 'av', d.id === 'review' ? '✓' : d.name.charAt(0)));
+      t.appendChild(el('b', null, d.tab || d.name));
+      t.appendChild(el('small', null, d.id === 'review' ? 'AI · not a founder' : (roles[d.name] || '')));
+      t.addEventListener('click', function(){ switchDesk(d.id); });
+      tabs.appendChild(t);
+      var th = el('div', 'thread'); th.setAttribute('aria-live', 'polite'); threads[d.id] = th; box.appendChild(th);
+    });
+    tabs.hidden = DESKS.length < 2;
+    var nc = $('nameChips'); nc.innerHTML = '';
+    AUDIENCE.forEach(function(n){ var b = el('button', 'qchip', n); b.type = 'button'; b.addEventListener('click', function(){ setName(n); }); nc.appendChild(b); });
+    nc.hidden = !AUDIENCE.length;
+    ASKER = cleanName(loadName());
+    if (ASKER) setName(ASKER); else { $('whoami').hidden = false; $('askingAs').hidden = true; }
+    switchDesk(DESKS[0].id);
   }
+  $('nameForm').addEventListener('submit', function(ev){ ev.preventDefault(); setName($('nameInput').value); $('nameInput').blur(); });
+  $('changeName').addEventListener('click', function(){ $('nameInput').value = ASKER; $('whoami').hidden = false; $('askingAs').hidden = true; $('nameInput').focus(); });
+  $('deskDirect').addEventListener('click', function(ev){
+    if (!requireName()){ ev.preventDefault(); return; }
+    this.href = 'https://wa.me/?text=' + encodeURIComponent('From ' + ASKER + ', for ' + DESK.send_to + ': ');
+  });
   $('askForm').addEventListener('submit', function(ev){
     ev.preventDefault(); var inp = $('askInput'); if (!ASK) return;
-    askTyped(inp.value); inp.value = ''; inp.blur();
+    if (askTyped(inp.value)){ inp.value = ''; inp.blur(); }
   });
 
   // ── spoken briefing: sentence by sentence, with a fallback timer per sentence
