@@ -11,12 +11,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Sans:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
 <style>
-  /* Layout: a broadcast desk behind a locked door. The door is a single passcode field;
-     behind it, the on-air strip, the edition's headline and play button, numbered bulletins,
-     numbers, and past editions. One deliberate dark look, QAELUM black and gold, heavy weights. */
+  /* Layout: a broadcast desk behind a locked door. Behind it: the on-air strip, the edition's
+     headline and play button, numbers, a "who did what" desk with a ledger of every change,
+     then each change told in full (who opened, reviewed and merged it, the plain version,
+     an analogy, and the story in order with the reviewers' own words), then status, blockers,
+     next steps, a short glossary and past editions. QAELUM black and gold, heavy weights. */
   :root{
-    --bg:#0A0A0B; --raised:#141518; --card:#1B1D21; --line:#2B2A26;
-    --gold:#C9971A; --gold-l:#E2B740; --cream:#F5F0E2; --grey:#B9B5A8; --grey-dim:#8C887D;
+    --bg:#0A0A0B; --raised:#141518; --card:#1E2025; --line:#2E2D29;
+    --gold:#C9971A; --gold-l:#E2B740; --cream:#F5F0E2; --grey:#C2BEB1; --grey-dim:#8F8B80;
     --live:#E5484D; --good:#3DDBB8; --warn:#F0B03A; --info:#94B4FF;
     --f-display:'Fraunces', Georgia, 'Times New Roman', serif;
     --f-body:'IBM Plex Sans', -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -24,16 +26,17 @@
     color-scheme: dark;
   }
   *{box-sizing:border-box;}
-  html{background:var(--bg);}
+  html{background:var(--bg); scroll-behavior:smooth;}
+  @media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto;} }
   body{background:var(--bg); color:var(--cream); margin:0;
        padding-inline:16px; padding-top:calc(22px + env(safe-area-inset-top,0px)); padding-bottom:calc(64px + env(safe-area-inset-bottom,0px));
-       font-family:var(--f-body); font-weight:500; font-size:17px; line-height:1.6;}
+       font-family:var(--f-body); font-weight:500; font-size:17px; line-height:1.6; overflow-wrap:anywhere;}
   [hidden]{display:none !important;}
   a{color:var(--gold-l); text-underline-offset:3px;}
   button,input{font-family:var(--f-body);}
   :focus-visible{outline:2px solid var(--gold-l); outline-offset:2px;}
   h1,h2,h3{margin:0; text-wrap:balance;}
-  .wrap{max-width:860px; margin:0 auto; display:flex; flex-direction:column; gap:30px;}
+  .wrap{max-width:880px; margin:0 auto; display:flex; flex-direction:column; gap:34px;}
 
   /* lock screen */
   .door{min-height:calc(100vh - 120px); display:flex; align-items:center; justify-content:center;}
@@ -73,7 +76,7 @@
   .lead{display:flex; flex-direction:column; gap:14px;}
   .edition-tag{font-family:var(--f-mono); font-weight:600; font-size:13px; letter-spacing:.12em; text-transform:uppercase; color:var(--gold);}
   .lead h1{font-family:var(--f-display); font-weight:700; font-size:clamp(28px,5.6vw,42px); line-height:1.12; color:#fff;}
-  .summary{font-size:18px; color:var(--cream); max-width:64ch; margin:0;}
+  .summary{font-size:18px; color:var(--cream); max-width:66ch; margin:0;}
   .player{display:flex; flex-wrap:wrap; align-items:center; gap:12px;}
   .play{display:inline-flex; align-items:center; gap:10px; background:var(--gold-l); color:#0A0A0B; border:0; border-radius:999px;
         padding:12px 20px; font-weight:700; font-size:16px; cursor:pointer;}
@@ -87,20 +90,57 @@
   .num .s{font-size:14px; color:var(--grey);}
 
   section{display:flex; flex-direction:column; gap:14px;}
-  h2{font-family:var(--f-display); font-weight:700; font-size:24px; color:#fff;}
+  h2{font-family:var(--f-display); font-weight:700; font-size:26px; color:#fff;}
+  .intro{margin:0; color:var(--grey); font-size:15.5px; max-width:68ch;}
+  .lbl{font-family:var(--f-mono); font-weight:600; font-size:11.5px; letter-spacing:.11em; text-transform:uppercase; color:var(--gold);}
+  .qt{color:#fff; font-weight:600;}
 
-  .bulletins{display:flex; flex-direction:column; gap:12px; counter-reset:b;}
-  .bul{background:var(--raised); border:1px solid var(--line); border-radius:12px; padding:16px 18px; display:flex; flex-direction:column; gap:8px;}
+  /* who did what */
+  .credits{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px;}
+  .credit{background:var(--raised); border:1px solid var(--line); border-radius:12px; padding:16px 18px; display:flex; flex-direction:column; gap:10px; min-width:0;}
+  .credit .nm{font-family:var(--f-display); font-weight:700; font-size:26px; line-height:1.1; color:#fff;}
+  .credit .list{gap:8px;} .credit .list li{font-size:15.5px;}
+  .ledger{background:var(--raised); border:1px solid var(--line); border-radius:12px; padding:6px 18px;}
+  .lrow{display:grid; grid-template-columns:minmax(0,1fr) repeat(3,minmax(0,112px)); gap:4px 14px; padding:11px 0; border-top:1px solid var(--line); align-items:baseline;}
+  .lrow:first-child{border-top:0;}
+  .lrow.head span{font-family:var(--f-mono); font-weight:600; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--gold);}
+  .lrow a{color:#fff; font-weight:700; text-decoration:none;}
+  .lrow a:hover{text-decoration:underline; text-decoration-color:var(--gold-l);}
+  .lrow .n{font-family:var(--f-mono); color:var(--gold-l); font-weight:600; font-size:14px; margin-right:8px;}
+  .lrow .c{font-weight:600; color:var(--cream); font-size:15px;}
+  .lrow .c i{display:none; font-style:normal; font-family:var(--f-mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--grey-dim); margin-right:6px;}
+
+  /* each change */
+  .bulletins{display:flex; flex-direction:column; gap:18px; counter-reset:b;}
+  .bul{background:var(--raised); border:1px solid var(--line); border-radius:14px; padding:18px 20px; display:flex; flex-direction:column; gap:14px; scroll-margin-top:16px;}
   .bul-head{display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:6px 12px;}
-  .bul h3{font-family:var(--f-body); font-weight:700; font-size:18px; color:#fff;}
-  .bul h3::before{counter-increment:b; content:counter(b, decimal-leading-zero) "  "; font-family:var(--f-mono); color:var(--gold); font-size:14px;}
+  .bul h3{font-family:var(--f-display); font-weight:700; font-size:22px; line-height:1.25; color:#fff;}
+  .bul h3::before{counter-increment:b; content:counter(b, decimal-leading-zero) "  "; font-family:var(--f-mono); color:var(--gold); font-size:15px;}
   .pill{font-family:var(--f-mono); font-weight:600; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; padding:3px 10px;
         border-radius:999px; border:1.5px solid currentColor; white-space:nowrap;}
   .pill.built{color:var(--good);} .pill.off{color:var(--warn);} .pill.design{color:var(--info);} .pill.fix{color:var(--good);}
-  .bul p{margin:0; max-width:70ch;}
+  .chips{display:flex; flex-wrap:wrap; gap:6px;}
+  .chip{font-family:var(--f-mono); font-weight:600; font-size:12.5px; padding:3px 9px; border-radius:6px; background:var(--card); border:1px solid var(--line); color:var(--grey);}
+  .chip.pr{color:var(--gold-l);} .chip.add{color:var(--good);} .chip.del{color:var(--live);}
+  .people{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px;}
+  .person{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:9px 12px; display:flex; flex-direction:column; gap:2px; min-width:0;}
+  .person .lbl{font-size:10.5px; letter-spacing:.05em; white-space:nowrap;}
+  .person .v{font-weight:700; color:#fff; font-size:16px; line-height:1.3;}
+  .block-txt{display:flex; flex-direction:column; gap:6px;}
+  .bul p{margin:0; max-width:72ch;}
+  .short{font-weight:700; color:#fff; font-size:17.5px;}
+  .analogy{border-left:3px solid var(--gold-l); background:rgba(201,151,26,.09); padding:11px 15px; border-radius:0 10px 10px 0; display:flex; flex-direction:column; gap:4px;}
   .why{color:var(--grey);}
   .why b{color:var(--gold-l); font-weight:700;}
-  .who{font-family:var(--f-mono); font-weight:500; font-size:12.5px; color:var(--grey-dim);}
+  .story{list-style:none; margin:4px 0 0 7px; padding:0; border-left:2px solid var(--line); display:flex; flex-direction:column;}
+  .story li{position:relative; padding:0 0 16px 20px;}
+  .story li:last-child{padding-bottom:2px;}
+  .story li::before{content:""; position:absolute; left:-8px; top:6px; width:14px; height:14px; border-radius:50%; background:var(--raised); border:2.5px solid var(--gold);}
+  .story li.merge::before{background:var(--good); border-color:var(--good);}
+  .story .when{display:block; font-family:var(--f-mono); font-size:12.5px; font-weight:600; color:var(--grey);}
+  .story .who-n{font-weight:700; color:var(--gold-l);}
+  .open-line{background:rgba(240,176,58,.08); border:1px solid rgba(240,176,58,.45); border-radius:10px; padding:10px 14px;}
+  .open-line b{color:var(--warn); font-weight:700;}
 
   .list{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:10px;}
   .list li{display:grid; grid-template-columns:22px minmax(0,1fr); gap:8px; align-items:start;}
@@ -113,11 +153,17 @@
   .move .to{color:var(--good); font-weight:600;}
   .move .from{color:var(--grey-dim); font-size:14px; display:block; font-weight:500;}
 
+  .gloss{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin:0;}
+  .gloss div{background:var(--raised); border:1px solid var(--line); border-radius:10px; padding:12px 14px; min-width:0;}
+  .gloss dt{font-weight:700; color:#fff;}
+  .gloss dd{margin:2px 0 0; color:var(--grey); font-size:15.5px;}
+
   .archive{display:flex; flex-direction:column; gap:8px;}
   details{background:var(--raised); border:1px solid var(--line); border-radius:10px;}
   summary{cursor:pointer; padding:12px 16px; font-weight:600; display:flex; gap:12px; flex-wrap:wrap; align-items:baseline;}
   summary .d{font-family:var(--f-mono); font-size:13px; color:var(--gold);}
   details .inner{padding:0 16px 14px; color:var(--grey); font-size:15.5px;}
+  details .inner p{margin:0 0 6px;}
   .empty{color:var(--grey); font-size:15px;}
 
   .rule{border:1px solid var(--line); border-radius:10px; padding:12px 14px; font-size:14.5px; color:var(--grey);}
@@ -125,9 +171,16 @@
   footer{font-family:var(--f-mono); font-size:12px; color:var(--grey-dim); border-top:1px solid var(--line); padding-top:16px;}
 
   @media (max-width:640px){
-    .numbers{grid-template-columns:minmax(0,1fr);}
+    .numbers,.credits,.gloss{grid-template-columns:minmax(0,1fr);}
     .move{grid-template-columns:minmax(0,1fr);}
+    .bul{padding:16px;}
+    .person{padding:8px 9px;}
+    .lrow{grid-template-columns:repeat(3,minmax(0,1fr)); gap:2px 10px;}
+    .lrow.head{display:none;}
+    .lrow .t{grid-column:1 / -1; margin-bottom:2px;}
+    .lrow .c i{display:block;}
   }
+  @media (max-width:380px){ .people{grid-template-columns:minmax(0,1fr);} }
 </style>
 </head>
 <body>
@@ -171,12 +224,22 @@
     </div>
   </div>
   <div class="numbers" id="numbers"></div>
-  <section><h2>What changed</h2><div class="bulletins" id="bulletins"></div></section>
+  <section id="whoSection">
+    <h2>Who did what</h2>
+    <div class="credits" id="credits"></div>
+    <div class="ledger" id="ledger"></div>
+  </section>
+  <section>
+    <h2>What changed, in full</h2>
+    <p class="intro" id="changesIntro">Each change says who opened it, who reviewed it and who merged it, then explains it in ordinary language and tells the story in order. Words in quotes are copied from the review conversation on GitHub. Times are Lagos time.</p>
+    <div class="bulletins" id="bulletins"></div>
+  </section>
   <section><h2>Status moves</h2><div class="moves" id="moves"></div></section>
   <section><h2>Blocked or waiting</h2><ul class="list block" id="blocked"></ul></section>
   <section><h2>Next on the list</h2><ul class="list" id="next"></ul></section>
+  <section id="glossSection"><h2>Words used on this page</h2><dl class="gloss" id="gloss"></dl></section>
   <section><h2>Past editions</h2><div class="archive" id="archive"></div></section>
-  <div class="rule"><b>How this is written.</b> Every line comes from a change merged into the QAELUM repository or from running its test suite on the day of the edition. If nothing moved, the edition says so. Built does not mean live: nothing here has run on the live network yet.</div>
+  <div class="rule"><b>How this is written.</b> Every line comes from a change merged into the QAELUM repository, its review conversation, or running its test suite on the day of the edition. Quotes are copied word for word. If nothing moved, the edition says so. Built does not mean live: nothing here has run on the live network yet.</div>
   <footer id="foot">Nahum · QAELUM Oracle Intelligence · private broadcast</footer>
 </div>
 
@@ -185,7 +248,8 @@
 <script>
 (function(){
   var $ = function(id){ return document.getElementById(id); };
-  var SEALED = JSON.parse($('sealed').textContent);
+  var OPEN = $('broadcast-data');               // present only on Nahum's own master page
+  var SEALED = OPEN ? null : JSON.parse($('sealed').textContent);
   var KEY_STORE = 'qaelum-broadcast-code';
   var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   var DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -207,32 +271,38 @@
   function recall(){ try { return localStorage.getItem(KEY_STORE); } catch(e){ return null; } }
   function forget(){ try { localStorage.removeItem(KEY_STORE); } catch(e){} }
 
+  function showBroadcast(data){ render(data); $('door').hidden = true; $('show').hidden = false; window.scrollTo(0, 0); }
+
   var msg = $('msg'), btn = $('openBtn');
-  if (!window.crypto || !crypto.subtle){
-    msg.className = 'msg err'; msg.textContent = 'This browser cannot open encrypted pages. Open the link in Chrome or Safari.'; btn.disabled = true;
-  }
 
   async function tryOpen(code, remember, quiet){
     btn.disabled = true; if (!quiet){ msg.className = 'msg wait'; msg.textContent = 'Unlocking…'; }
     try {
       var data = await unseal(code);
       if (remember) store(code);
-      msg.textContent = ''; render(data); $('door').hidden = true; $('show').hidden = false; window.scrollTo(0, 0);
+      msg.textContent = ''; showBroadcast(data);
     } catch(e){
       if (quiet){ forget(); msg.textContent = ''; }
       else { msg.className = 'msg err'; msg.textContent = 'That passcode did not open it. Check it and try again.'; }
     } finally { btn.disabled = false; }
   }
 
-  $('doorForm').addEventListener('submit', function(ev){ ev.preventDefault(); tryOpen($('code').value, $('remember').checked, false); });
-  $('lockBtn').addEventListener('click', function(){ forget(); stopAudio(); location.reload(); });
-  var saved = recall(); if (saved && window.crypto && crypto.subtle) tryOpen(saved, true, true);
-
   function longDate(iso){
     var p = iso.split('-').map(Number); var d = new Date(Date.UTC(p[0], p[1]-1, p[2]));
     return DAYS[d.getUTCDay()] + ' ' + p[2] + ' ' + MONTHS[p[1]-1] + ' ' + p[0];
   }
   function el(tag, cls, text){ var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function fmt(n){ return Number(n).toLocaleString('en-GB'); }
+  // Text with "quoted words" gets curly quotes and the quoted part set in white.
+  function rich(parent, text){
+    String(text).split('"').forEach(function(seg, i){
+      if (!seg) return;
+      if (i % 2) parent.appendChild(el('span', 'qt', '“' + seg + '”'));
+      else parent.appendChild(document.createTextNode(seg));
+    });
+    return parent;
+  }
+  function labelled(cls, label, text){ var d = el('div', cls); d.appendChild(el('span', 'lbl', label)); d.appendChild(rich(el('p'), text)); return d; }
 
   var ed = null;
   function render(DATA){
@@ -256,16 +326,73 @@
     var nb = $('numbers'); nb.innerHTML = '';
     (ed.numbers || []).forEach(function(n){ var c = el('div', 'num'); c.appendChild(el('span', 'k', n.k)); c.appendChild(el('span', 'v', n.v)); c.appendChild(el('span', 's', n.s)); nb.appendChild(c); });
 
+    // Who did what: one card per person, then a ledger of every change.
+    var changes = ed.changes || [];
+    var cr = $('credits'); cr.innerHTML = '';
+    (ed.credits || []).forEach(function(p){
+      var c = el('div', 'credit'); c.appendChild(el('span', 'nm', p.name)); if (p.role) c.appendChild(el('span', 'lbl', p.role));
+      var u = el('ul', 'list'); (p.did || []).forEach(function(t){ var li = el('li'); li.appendChild(rich(el('span'), t)); u.appendChild(li); });
+      c.appendChild(u); cr.appendChild(c);
+    });
+    cr.hidden = !(ed.credits && ed.credits.length);
+    var lg = $('ledger'); lg.innerHTML = '';
+    var withPeople = changes.filter(function(c){ return c.people; });
+    if (withPeople.length){
+      var hd = el('div', 'lrow head'); ['Change', 'Opened by', 'Reviewed by', 'Merged by'].forEach(function(t){ hd.appendChild(el('span', null, t)); }); lg.appendChild(hd);
+      changes.forEach(function(c, i){
+        var p = c.people || {}; var r = el('div', 'lrow');
+        var t = el('span', 't'); var a = el('a'); a.href = '#ch-' + (i + 1);
+        if (c.stats && c.stats.pr) a.appendChild(el('span', 'n', '#' + c.stats.pr)); a.appendChild(document.createTextNode(c.title)); t.appendChild(a); r.appendChild(t);
+        [['Opened', p.opened], ['Reviewed', p.reviewed], ['Merged', p.merged]].forEach(function(x){ var s = el('span', 'c'); s.appendChild(el('i', null, x[0])); s.appendChild(document.createTextNode(x[1] || '—')); r.appendChild(s); });
+        lg.appendChild(r);
+      });
+    }
+    lg.hidden = !withPeople.length;
+    $('whoSection').hidden = cr.hidden && lg.hidden;
+
     var bl = $('bulletins'); bl.innerHTML = '';
-    if (!ed.changes || !ed.changes.length) bl.appendChild(el('p', 'empty', 'Nothing was merged in this period.'));
-    (ed.changes || []).forEach(function(c){
-      var b = el('article', 'bul'); var hd = el('div', 'bul-head');
-      hd.appendChild(el('h3', null, c.title)); hd.appendChild(el('span', 'pill ' + (c.status || 'built'), c.status_label || c.status));
-      b.appendChild(hd); b.appendChild(el('p', null, c.plain));
+    if (!changes.length) bl.appendChild(el('p', 'empty', 'Nothing was merged in this period.'));
+    changes.forEach(function(c, i){
+      var b = el('article', 'bul'); b.id = 'ch-' + (i + 1);
+      var hd = el('div', 'bul-head'); hd.appendChild(el('h3', null, c.title)); hd.appendChild(el('span', 'pill ' + (c.status || 'built'), c.status_label || c.status)); b.appendChild(hd);
+      if (c.stats){
+        var ch = el('div', 'chips'), s = c.stats;
+        if (s.pr) ch.appendChild(el('span', 'chip pr', 'PR #' + s.pr));
+        if (s.files != null) ch.appendChild(el('span', 'chip', fmt(s.files) + (s.files === 1 ? ' file' : ' files')));
+        if (s.added != null) ch.appendChild(el('span', 'chip add', '+' + fmt(s.added) + ' lines'));
+        if (s.removed != null) ch.appendChild(el('span', 'chip del', '−' + fmt(s.removed) + ' lines'));
+        if (s.branch) ch.appendChild(el('span', 'chip', 'branch ' + s.branch));
+        b.appendChild(ch);
+      }
+      if (c.people){
+        var pp = el('div', 'people');
+        [['Opened by', c.people.opened], ['Reviewed by', c.people.reviewed], ['Merged by', c.people.merged]].forEach(function(x){
+          var d = el('div', 'person'); d.appendChild(el('span', 'lbl', x[0])); d.appendChild(el('span', 'v', x[1] || '—')); pp.appendChild(d);
+        });
+        b.appendChild(pp);
+      }
+      b.appendChild(el('p', 'short', c.plain));
+      if (c.ordinary) b.appendChild(labelled('block-txt', 'In ordinary language', c.ordinary));
+      if (c.analogy) b.appendChild(labelled('analogy', 'Think of it like', c.analogy));
       if (c.why){ var w = el('p', 'why'); w.appendChild(el('b', null, 'Why it matters: ')); w.appendChild(document.createTextNode(c.why)); b.appendChild(w); }
-      if (c.who) b.appendChild(el('span', 'who', c.who));
+      if (c.story && c.story.length){
+        var sw = el('div', 'block-txt'); sw.appendChild(el('span', 'lbl', 'How it happened'));
+        var ol = el('ol', 'story');
+        c.story.forEach(function(s, j){
+          var li = el('li', (j === c.story.length - 1 && /^Merged/.test(s.what)) ? 'merge' : null);
+          li.appendChild(el('span', 'when', s.when));
+          // A name followed by "Opened the change" reads as "<name> opened the change".
+          var what = /^[A-Z][a-z]/.test(s.what) ? s.what.charAt(0).toLowerCase() + s.what.slice(1) : s.what;
+          var p = el('p'); p.appendChild(el('span', 'who-n', s.who + ' ')); rich(p, what); li.appendChild(p);
+          ol.appendChild(li);
+        });
+        sw.appendChild(ol); b.appendChild(sw);
+      }
+      if (c.open){ var o = el('p', 'open-line'); o.appendChild(el('b', null, 'Still open: ')); o.appendChild(document.createTextNode(c.open)); b.appendChild(o); }
+      if (!c.people && c.who) b.appendChild(el('span', 'meta', c.who));
       bl.appendChild(b);
     });
+    $('changesIntro').hidden = !changes.some(function(c){ return c.story || c.people; });
 
     var mv = $('moves'); mv.innerHTML = '';
     if (!ed.moves || !ed.moves.length) mv.appendChild(el('p', 'empty', 'No status changes this period.'));
@@ -281,13 +408,21 @@
     fillList('blocked', ed.blocked, 'Nothing blocked.');
     fillList('next', ed.next, 'Nothing scheduled.');
 
+    var gl = $('gloss'); gl.innerHTML = '';
+    (ed.glossary || []).forEach(function(g){ var d = el('div'); d.appendChild(el('dt', null, g.term)); d.appendChild(el('dd', null, g.meaning)); gl.appendChild(d); });
+    $('glossSection').hidden = !(ed.glossary && ed.glossary.length);
+
     var ar = $('archive'); ar.innerHTML = ''; var past = eds.slice(1);
     if (!past.length) ar.appendChild(el('p', 'empty', 'This is the first edition. Past editions will collect here.'));
     past.forEach(function(p){
       var dt = el('details'); var sm = el('summary');
       sm.appendChild(el('span', 'd', 'Edition ' + p.number + ' · ' + longDate(p.date))); sm.appendChild(el('span', null, p.headline));
       dt.appendChild(sm); var inner = el('div', 'inner'); inner.appendChild(el('p', null, p.summary));
-      (p.changes || []).forEach(function(c){ inner.appendChild(el('p', null, '• ' + c.title + ' (' + (c.status_label || c.status) + ')')); });
+      (p.changes || []).forEach(function(c){
+        var line = '• ' + (c.stats && c.stats.pr ? '#' + c.stats.pr + ' ' : '') + c.title + ' (' + (c.status_label || c.status) + ')';
+        if (c.people) line += ' — opened by ' + (c.people.opened || '—') + ', reviewed by ' + (c.people.reviewed || '—') + ', merged by ' + (c.people.merged || '—');
+        inner.appendChild(el('p', null, line));
+      });
       dt.appendChild(inner); ar.appendChild(dt);
     });
     $('foot').textContent = 'Nahum · QAELUM Oracle Intelligence · private broadcast · repository state ' + ed.head_commit;
@@ -301,13 +436,22 @@
   var PLAY = 'M3 1.8v12.4L14 8z', STOP = 'M3 3h10v10H3z';
   if (!synth || typeof window.SpeechSynthesisUtterance !== 'function') $('player').hidden = true;
 
+  function joinAnd(a){ return a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1]; }
+  function whoSaid(p){
+    if (!p) return '';
+    var w = [];
+    if (p.opened) w.push(p.opened + ' opened it');
+    if (p.reviewed && !/^requested/i.test(p.reviewed)) w.push(p.reviewed.replace(/\s*\(.*?\)/g, '') + ' reviewed it' + (/twice/i.test(p.reviewed) ? ' twice' : ''));
+    if (p.merged) w.push(p.merged + ' merged it');
+    return w.length ? joinAnd(w) + '. ' : '';
+  }
   function script(){
     var parts = ['QAELUM build broadcast, edition ' + ed.number + '.', ed.headline + '.', ed.summary];
-    (ed.changes || []).forEach(function(c, i){ parts.push('Item ' + (i + 1) + ': ' + c.title + '. ' + c.plain); });
+    (ed.changes || []).forEach(function(c, i){ parts.push('Item ' + (i + 1) + ': ' + c.title + '. ' + whoSaid(c.people) + c.plain); });
     if (ed.numbers && ed.numbers[0]) parts.push(ed.numbers[0].k + ': ' + ed.numbers[0].v + '.');
     if (ed.blocked && ed.blocked[0]) parts.push('The biggest open problem: ' + ed.blocked[0]);
-    parts.push('That is the briefing. The full edition is on the page.');
-    return parts.join(' ').replace(/\s+/g, ' ').match(/[^.!?]+[.!?]+(\s|$)|[^.!?]+$/g).map(function(s){ return s.trim(); }).filter(Boolean);
+    parts.push('That is the briefing. The full story of each change, with who said what, is on the page.');
+    return parts.join(' ').replace(/"/g, '').replace(/\s+/g, ' ').match(/[^.!?]+[.!?]+(\s|$)|[^.!?]+$/g).map(function(s){ return s.trim(); }).filter(Boolean);
   }
   function setUI(on){
     playing = on; playLabel.textContent = on ? 'Stop briefing' : 'Play briefing';
@@ -332,6 +476,19 @@
     queue = script(); idx = 0; token++; setUI(true); speakNext(token);
   });
   window.addEventListener('pagehide', stopAudio);
+
+  // ── open the page
+  if (OPEN){
+    $('lockBtn').hidden = true;
+    showBroadcast(JSON.parse(OPEN.textContent));
+  } else {
+    if (!window.crypto || !crypto.subtle){
+      msg.className = 'msg err'; msg.textContent = 'This browser cannot open encrypted pages. Open the link in Chrome or Safari.'; btn.disabled = true;
+    }
+    $('doorForm').addEventListener('submit', function(ev){ ev.preventDefault(); tryOpen($('code').value, $('remember').checked, false); });
+    $('lockBtn').addEventListener('click', function(){ forget(); stopAudio(); location.reload(); });
+    var saved = recall(); if (saved && window.crypto && crypto.subtle) tryOpen(saved, true, true);
+  }
 })();
 </script>
 </body>

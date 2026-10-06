@@ -6,4 +6,6 @@ Plain-English engineering updates on the QAELUM build, for a small named audienc
 
 `tools/build.py` and `tools/template.html` rebuild the page from the edition data. The passcode is supplied at build time and is never committed.
 
+`tools/make_master.py` builds Nahum's private master page from the same template, so the master and this page always look the same. Each change shows who opened, reviewed and merged it, with the review story in order.
+
 Nahum · QAELUM Oracle Intelligence
